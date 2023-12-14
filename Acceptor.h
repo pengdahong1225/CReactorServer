@@ -10,7 +10,6 @@
 #include "Common/noncopyable.h"
 #include "Net/InetAddress.h"
 
-
 /*
  * 接收器 -- incoming of Tcp Connections
  */
@@ -22,6 +21,7 @@ namespace core::net
     class Acceptor : noncopyable
     {
         using NewConnectionCallback = std::function<void(int sockfd, InetAddr &)>;
+
     public:
         Acceptor(EventLoop *loop, const InetAddr &addr);
         ~Acceptor();
@@ -35,9 +35,9 @@ namespace core::net
         EventLoop *loop_;
         Socket acceptSocket_;
         bool listening_;
-        Channel acceptChannel_;
+        Channel acceptChannel_; // acceptor loop对应的处理器
         NewConnectionCallback newConnectionCallback_;
     };
 }
 
-#endif //CREACTORSERVER_ACCEPTOR_H
+#endif // CREACTORSERVER_ACCEPTOR_H

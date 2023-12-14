@@ -11,8 +11,8 @@ using namespace core;
 using namespace core::net;
 
 Acceptor::Acceptor(EventLoop *loop, const InetAddr &addr)
-        : loop_(loop), acceptSocket_(Socket::createSockForTCPV4()),
-          acceptChannel_(loop, acceptSocket_.fd())
+    : loop_(loop), acceptSocket_(Socket::createSockForTCPV4()),
+      acceptChannel_(loop, acceptSocket_.fd())
 {
     acceptSocket_.bind(addr);
     listening_ = false;
@@ -48,13 +48,20 @@ void Acceptor::handleRead()
     // 新连接入口
     struct sockaddr_in *sin;
     int connfd = acceptSocket_.accept(sin);
-    if (connfd < 0) {
+    if (connfd < 0)
+    {
         printf("Acceptor::handleRead accept error\n");
-    } else {
-        if (newConnectionCallback_) {
+    }
+    else
+    {
+        if (newConnectionCallback_)
+        {
             InetAddr addr{std::string(inet_ntoa(sin->sin_addr)), sin->sin_port};
             newConnectionCallback_(connfd, addr);
-        } else
+        }
+        else
+        {
             ::close(connfd);
+        }
     }
 }
