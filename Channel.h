@@ -19,6 +19,7 @@ namespace core::net
     class Channel
     {
         using eventCallback = std::function<void()>;
+
     public:
         Channel(EventLoop *loop, int fd);
         ~Channel();
@@ -35,7 +36,7 @@ namespace core::net
         void setWriteCallback(const eventCallback cb);
 
         void update();
-        void handleEvents();// 处理响应的事件
+        void handleEvents(); // 处理响应的事件
         void set_revent(int events);
         void remove();
 
@@ -53,9 +54,9 @@ namespace core::net
         int fd_;
         int events_;
         int revents_;
-        int index_; // default == -1
+        int index_;          // default == -1
         bool eventHandling_; // 是否在处理中
-        bool addedToLoop_; // 是否添加到loop中
+        bool addedToLoop_;   // 是否添加到loop中
 
         // 回调
         eventCallback closeCallBack_;
@@ -70,4 +71,4 @@ namespace core::net
     };
 }
 
-#endif //CREACTORSERVER_CHANNEL_H
+#endif // CREACTORSERVER_CHANNEL_H
