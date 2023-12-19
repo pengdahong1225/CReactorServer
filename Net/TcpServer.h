@@ -5,8 +5,8 @@
 #ifndef CREACTORSERVER_TCPSERVER_H
 #define CREACTORSERVER_TCPSERVER_H
 
-#include "Common/noncopyable.h"
-#include "Net/InetAddress.h"
+#include "../Common/noncopyable.h"
+#include "InetAddress.h"
 #include "TcpConnection.h"
 #include <vector>
 #include <string>

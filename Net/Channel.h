@@ -5,7 +5,7 @@
 #ifndef CREACTORSERVER_CHANNEL_H
 #define CREACTORSERVER_CHANNEL_H
 
-#include "Common/noncopyable.h"
+#include "../Common/noncopyable.h"
 #include <functional>
 
 /*

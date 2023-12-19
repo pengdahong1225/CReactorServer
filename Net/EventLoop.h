@@ -5,8 +5,8 @@
 #ifndef CREACTORSERVER_EVENTLOOP_H
 #define CREACTORSERVER_EVENTLOOP_H
 
-#include "Common/Callbacks.h"
-#include "Common/noncopyable.h"
+#include "../Common/Callbacks.h"
+#include "../Common/noncopyable.h"
 #include <vector>
 #include <memory>
 #include <atomic>

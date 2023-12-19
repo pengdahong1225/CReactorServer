@@ -6,9 +6,9 @@
 #define CREACTORSERVER_ACCEPTOR_H
 
 #include "Channel.h"
-#include "Net/Socket.h"
-#include "Common/noncopyable.h"
-#include "Net/InetAddress.h"
+#include "Socket.h"
+#include "../Common/noncopyable.h"
+#include "InetAddress.h"
 
 /*
  * 接收器 -- incoming of Tcp Connections

@@ -5,9 +5,9 @@
 #ifndef CREACTORSERVER_TCPCONNECTION_H
 #define CREACTORSERVER_TCPCONNECTION_H
 
-#include "Common/Callbacks.h"
-#include "Common/Code_c.h"
-#include "Net/InetAddress.h"
+#include "../Common/Callbacks.h"
+#include "../Common/Code_c.h"
+#include "InetAddress.h"
 #include "Buffer.h"
 #include <string>
 #include <memory>
