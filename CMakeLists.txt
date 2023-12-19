@@ -9,11 +9,13 @@ endif ()
 
 project(${TARGET})
 
-include_directories(core/Common)
+include_directories(Common)
 
-aux_source_directory(core SRCS)
-aux_source_directory(core/Common SRCS)
-aux_source_directory(core/Base SRCS)
-aux_source_directory(core/Net SRCS)
-aux_source_directory(core/Net/Poller SRCS)
-aux_source_directory(core/Log SRCS)
+aux_source_directory(. SRCS)
+aux_source_directory(Common SRCS)
+aux_source_directory(Base SRCS)
+aux_source_directory(Net SRCS)
+aux_source_directory(Net/Poller SRCS)
+aux_source_directory(Log SRCS)
+
+add_library(${TARGET} STATIC ${SRCS})
