@@ -6,23 +6,22 @@
 #define CREACTORSERVER_SOCKET_H
 
 #include <sys/socket.h>
-#include "../Common/noncopyable.h"
+#include "noncopyable.h"
 #include "InetAddress.h"
 
 /*
- * 封装socket细节
+ * socket细节
  */
 
-class Socket : noncopyable
-{
-    enum state
-    {
+class Socket : noncopyable {
+    enum state {
         SockOk,
         SockError,
     };
 public:
     explicit Socket(int sockfd);
     ~Socket();
+
     int fd() const;
     void bind(const InetAddr &addr);
     void listen();

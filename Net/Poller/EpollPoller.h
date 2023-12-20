@@ -10,17 +10,15 @@
 /*
  * epoll
  */
-namespace
-{
+namespace {
     const int kNew = -1;
     const int kAdded = 1;
     const int kDeleted = 2;
 }
 struct epoll_event;
-namespace core::net
-{
-    class EpollPoller : public Poller
-    {
+
+namespace reactor {
+    class EpollPoller : public Poller {
     public:
         explicit EpollPoller(EventLoop *loop);
         ~EpollPoller() override;
@@ -34,7 +32,7 @@ namespace core::net
         static const char *operationToString(int op);
         void fillActiveChannels(int activeNum, ChannelList *activeChannels);
         void update(int operation, Channel *channel);
-        void memZero(void* ptr, size_t size);
+        void memZero(void *ptr, size_t size);
 
     private:
         std::vector<struct epoll_event> eventList_;

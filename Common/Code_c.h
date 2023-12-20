@@ -33,11 +33,9 @@ static int packetSize = 4;
 static std::string magicCode = "XX";
 static int magicCodeSize = 2;
 
-class Codec : noncopyable
-{
+class Codec : noncopyable {
 public:
-    std::string EnCodeData(const std::string &buf)
-    {
+    std::string EnCodeData(const std::string &buf) {
         std::string data;
         const size_t length = packetSize + magicCodeSize + buf.size();
         char frame[length];
@@ -52,8 +50,7 @@ public:
         return data;
     }
 
-    std::string DeCodeData(core::net::Buffer &buffer)
-    {
+    std::string DeCodeData(reactor::Buffer &buffer) {
         std::string header, magic, body;
         if (buffer.readableBytes() > 0) {
             header = buffer.retrieveAsString(packetSize);

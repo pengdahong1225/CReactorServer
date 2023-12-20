@@ -6,7 +6,6 @@
 #define CREACTORSERVER_POLLER_H
 
 #include "noncopyable.h"
-#include "../EventLoop.h"
 #include <vector>
 #include <map>
 
@@ -14,15 +13,14 @@
  * Base class for IO Multiplexing
  */
 
-namespace core::net
-{
+namespace reactor {
+    class EventLoop;
     class Channel;
 
-    class Poller : noncopyable
-    {
-    public:
+    class Poller : noncopyable {
         using ChannelList = std::vector<Channel *>;
         using ChannelMap = std::map<int, Channel *>; //(fd,Channel*)
+    public:
 
         Poller(EventLoop *loop);
         virtual ~Poller();
@@ -31,8 +29,10 @@ namespace core::net
         virtual void updateChannel(Channel *channel) = 0; // 添加一个 IO event
         virtual void removeChannel(Channel *channel) = 0;
         virtual bool hasChannel(Channel *channel) const;
+
         static Poller *newDefaultPoller(EventLoop *loop);
         void assertInLoopThread();
+
     protected:
         ChannelMap channelMap_;
     private:

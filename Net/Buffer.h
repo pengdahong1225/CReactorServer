@@ -5,7 +5,7 @@
 #ifndef CREACTORSERVER_BUFFER_H
 #define CREACTORSERVER_BUFFER_H
 
-#include "../Common/noncopyable.h"
+#include "noncopyable.h"
 #include <vector>
 #include <sys/types.h>
 #include <string>
@@ -22,10 +22,8 @@
  * 0      <=      readerIndex   <=   writerIndex    <=     size
  */
 
-namespace core::net
-{
-    class Buffer
-    {
+namespace reactor {
+    class Buffer {
     public:
         static const size_t kCheapPrepend = 8;
         static const size_t kInitialSize = 1024;
@@ -36,7 +34,6 @@ namespace core::net
         size_t readableBytes();
         size_t writeableBytes();
         size_t prependableBytes();
-
         ssize_t readFd(int fd);// 内核缓冲区 -> 用户缓冲区
         void append(const char *data, size_t len);
         void ensureWriteableBytes(size_t len);// 确保空间充足 不够就扩充
@@ -44,31 +41,22 @@ namespace core::net
         const char *peek() const;
         void retrieve(size_t len);
         void retrieveAll();
-
         std::string retrieveAllAsString();
         std::string retrieveAsString(size_t len);
 
     private:
         void makeSpace(size_t len);
-
         // 返回缓冲区起始地址
-        char *begin()
-        {
+        char *begin() {
             return &*buffer_.begin();
         }
-
-        const char *begin() const
-        {
+        const char *begin() const {
             return &*buffer_.begin();
         }
-
-        char *beginWrite()
-        {
+        char *beginWrite() {
             return begin() + writerIndex_;
         }
-
-        const char *beginWrite() const
-        {
+        const char *beginWrite() const {
             return begin() + writerIndex_;
         }
 

@@ -6,30 +6,27 @@
 #include "PollPoller.h"
 #include "EpollPoller.h"
 #include "../Channel.h"
+#include "../EventLoop.h"
 
-using namespace core;
-using namespace core::net;
 
-Poller::Poller(EventLoop *loop) : ownerLoop_(loop)
-{}
+using namespace reactor;
+
+Poller::Poller(EventLoop *loop) : ownerLoop_(loop) {}
 
 Poller::~Poller() = default;
 
-bool Poller::hasChannel(Channel *channel) const
-{
+bool Poller::hasChannel(Channel *channel) const {
     auto it = channelMap_.find(channel->fd());
     return it != channelMap_.end() && it->second == channel;
 }
 
-Poller *Poller::newDefaultPoller(EventLoop *loop)
-{
-    if (::getenv("USE_POLL"))
-        return new PollPoller(loop);
-    else
-        return new EpollPoller(loop);
+Poller *Poller::newDefaultPoller(EventLoop *loop) {
+#ifdef D_POLL
+    return new PollPoller(loop);
+#endif
+    return new EpollPoller(loop);
 }
 
-void Poller::assertInLoopThread()
-{
+void Poller::assertInLoopThread() {
     ownerLoop_->assertInLoopThread();
 }

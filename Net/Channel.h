@@ -5,49 +5,66 @@
 #ifndef CREACTORSERVER_CHANNEL_H
 #define CREACTORSERVER_CHANNEL_H
 
-#include "../Common/noncopyable.h"
+#include "noncopyable.h"
 #include <functional>
 
 /*
  * 处理器--一个channel对应一个fd，绑定回调函数
+ * 连接事件：poller->eventloop->channel->acceptor
+ * 普通事件过程：poller->eventloop->channel->回调函数
  */
 
-namespace core::net
-{
+namespace reactor {
     class EventLoop;
 
-    class Channel
-    {
+    class Channel {
         using eventCallback = std::function<void()>;
-
     public:
         Channel(EventLoop *loop, int fd);
         ~Channel();
 
         EventLoop *getLoop() const;
-        int fd() const;
-        int event() const;
-        int revent() const;
-        int index() const;
-        void set_index(int index);
+        void update();
+        void remove();
+        void handleEvents(); // 处理响应的事件
+        void set_revent(int events);
+
+    public:
+        int fd() const {
+            return fd_;
+        }
+        int event() const {
+            return events_;
+        }
+        int revent() const {
+            return revents_;
+        }
+        int index() const {
+            return index_;
+        }
+        void set_index(int index) {
+            index_ = index;
+        }
+        bool isWriting() const {
+            return events_ & kWriteEvent;
+        }
+        bool isReading() const {
+            return events_ & kReadEvent;
+        }
+        bool isNoneEvent() const {
+            return events_ == kNoneEvent;
+        }
+
         void setCloseCallback(const eventCallback cb);
         void setErrorCallback(const eventCallback cb);
         void setReadCallback(const eventCallback cb);
         void setWriteCallback(const eventCallback cb);
-
-        void update();
-        void handleEvents(); // 处理响应的事件
-        void set_revent(int events);
-        void remove();
 
         void enableReading();
         void disableReading();
         void enableWriting();
         void disableWriting();
         void disableAll();
-        bool isWriting() const;
-        bool isReading() const;
-        bool isNoneEvent() const;
 
     private:
         EventLoop *ownerLoop_;
@@ -55,7 +72,7 @@ namespace core::net
         int events_;
         int revents_;
         int index_;          // default == -1
-        bool eventHandling_; // 是否在处理中
+        bool eventHandling_; // 改是否在处理中
         bool addedToLoop_;   // 是否添加到loop中
 
         // 回调

@@ -13,10 +13,8 @@
 /*
  * poll
  */
-namespace core::net
-{
-    class PollPoller : public Poller
-    {
+namespace reactor {
+    class PollPoller : public Poller {
     public:
         explicit PollPoller(EventLoop *loop);
         ~PollPoller() override;

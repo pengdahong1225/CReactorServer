@@ -7,16 +7,13 @@
 #include <cstdio>
 #include <cassert>
 
-using namespace core;
-using namespace core::net;
+using namespace reactor;
 
-PollPoller::PollPoller(EventLoop *loop) : Poller(loop)
-{}
+PollPoller::PollPoller(EventLoop *loop) : Poller(loop) {}
 
 PollPoller::~PollPoller() = default;
 
-void PollPoller::updateChannel(Channel *ch)
-{
+void PollPoller::updateChannel(Channel *ch) {
     if (ch->index() < 0) {
         // this channel is a new one
         assert(channelMap_.find(ch->fd()) == channelMap_.end());
@@ -40,8 +37,7 @@ void PollPoller::updateChannel(Channel *ch)
     }
 }
 
-int PollPoller::poll(int timeout, ChannelList *activeChannels)
-{
+int PollPoller::poll(int timeout, ChannelList *activeChannels) {
     int activeNum = ::poll(pollfds_.data(), pollfds_.size(), timeout);//阻塞函数
     if (activeNum > 0)
         fillActiveChannels(activeNum, activeChannels);
@@ -51,8 +47,7 @@ int PollPoller::poll(int timeout, ChannelList *activeChannels)
         printf("ERROR occurs when ::poll()\n");
 }
 
-void PollPoller::fillActiveChannels(int activeNum, ChannelList *activeChannels)
-{
+void PollPoller::fillActiveChannels(int activeNum, ChannelList *activeChannels) {
     for (const auto &temp: pollfds_) {
         if (activeNum < 0)
             break;
@@ -65,8 +60,7 @@ void PollPoller::fillActiveChannels(int activeNum, ChannelList *activeChannels)
     }
 }
 
-void PollPoller::removeChannel(Channel *channel)
-{
+void PollPoller::removeChannel(Channel *channel) {
     assertInLoopThread();
     assert(channelMap_.find(channel->fd()) != channelMap_.end());
     assert(channelMap_[channel->fd()] == channel);

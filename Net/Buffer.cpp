@@ -3,44 +3,36 @@
 //
 
 #include "Buffer.h"
-#include <sys/types.h>
 #include <cstring>
-#include <algorithm>
 #include <cassert>
 #include <sys/uio.h>
 
-using namespace core;
-using namespace core::net;
+using namespace reactor;
 
 const size_t Buffer::kCheapPrepend;
 const size_t Buffer::kInitialSize;
 
 Buffer::Buffer()
         : buffer_(kCheapPrepend + kInitialSize),
-          readerIndex_(kCheapPrepend), writerIndex_(kCheapPrepend)
-{
+          readerIndex_(kCheapPrepend), writerIndex_(kCheapPrepend) {
     assert(readableBytes() == 0);
     assert(writeableBytes() == kInitialSize);
     assert(prependableBytes() == kCheapPrepend);
 }
 
-size_t Buffer::readableBytes()
-{
+size_t Buffer::readableBytes() {
     return writerIndex_ - readerIndex_;
 }
 
-size_t Buffer::writeableBytes()
-{
+size_t Buffer::writeableBytes() {
     return buffer_.size() - writerIndex_;
 }
 
-size_t Buffer::prependableBytes()
-{
+size_t Buffer::prependableBytes() {
     return readerIndex_;
 }
 
-ssize_t Buffer::readFd(int fd)
-{
+ssize_t Buffer::readFd(int fd) {
     char extrabuf[kInitialSize]; // 临时栈
     memset(extrabuf, 0, sizeof extrabuf);
     struct iovec vec[2];
@@ -63,28 +55,24 @@ ssize_t Buffer::readFd(int fd)
     return n;
 }
 
-void Buffer::append(const char *data, size_t len)
-{
+void Buffer::append(const char *data, size_t len) {
     ensureWriteableBytes(len);
     std::copy(data, data + len, beginWrite());
     hasWritten(len);
 }
 
-void Buffer::ensureWriteableBytes(size_t len)
-{
+void Buffer::ensureWriteableBytes(size_t len) {
     if (writeableBytes() < len)
         makeSpace(len);
     assert(writeableBytes() >= len);
 }
 
-void Buffer::hasWritten(size_t len)
-{
+void Buffer::hasWritten(size_t len) {
     assert(len <= writeableBytes());
     writerIndex_ += len;
 }
 
-void Buffer::makeSpace(size_t len)
-{
+void Buffer::makeSpace(size_t len) {
     if (writeableBytes() + prependableBytes() < len + kCheapPrepend) {
         // 扩容
         buffer_.resize(writerIndex_ + len);
@@ -100,13 +88,11 @@ void Buffer::makeSpace(size_t len)
     }
 }
 
-const char *Buffer::peek() const
-{
+const char *Buffer::peek() const {
     return begin() + readerIndex_;
 }
 
-void Buffer::retrieve(size_t len)
-{
+void Buffer::retrieve(size_t len) {
     assert(len <= readableBytes());
     if (len < readableBytes())
         readerIndex_ += len;
@@ -114,19 +100,16 @@ void Buffer::retrieve(size_t len)
         retrieveAll();
 }
 
-void Buffer::retrieveAll()
-{
+void Buffer::retrieveAll() {
     readerIndex_ = kCheapPrepend;
     writerIndex_ = kCheapPrepend;
 }
 
-std::string Buffer::retrieveAllAsString()
-{
+std::string Buffer::retrieveAllAsString() {
     return retrieveAsString(readableBytes());
 }
 
-std::string Buffer::retrieveAsString(size_t len)
-{
+std::string Buffer::retrieveAsString(size_t len) {
     assert(len <= readableBytes());
     std::string result(peek(), len);
     retrieve(len);

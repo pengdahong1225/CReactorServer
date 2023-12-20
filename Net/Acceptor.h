@@ -6,22 +6,19 @@
 #define CREACTORSERVER_ACCEPTOR_H
 
 #include "Channel.h"
-#include "Socket.h"
-#include "../Common/noncopyable.h"
-#include "InetAddress.h"
+#include "../Base/Socket.h"
+#include "noncopyable.h"
+#include "../Base/InetAddress.h"
 
 /*
  * 接收器 -- incoming of Tcp Connections
  */
 
-namespace core::net
-{
+namespace reactor {
     class EventLoop;
 
-    class Acceptor : noncopyable
-    {
+    class Acceptor : noncopyable {
         using NewConnectionCallback = std::function<void(int sockfd, InetAddr &)>;
-
     public:
         Acceptor(EventLoop *loop, const InetAddr &addr);
         ~Acceptor();

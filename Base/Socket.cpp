@@ -8,8 +8,7 @@
 #include <arpa/inet.h>
 #include "Socket.h"
 
-int Socket::createSockForTCPV4()
-{
+int Socket::createSockForTCPV4() {
     // 可以选择阻塞和非阻塞
     int fd = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (fd < 0)
@@ -17,23 +16,19 @@ int Socket::createSockForTCPV4()
     return fd;
 }
 
-Socket::Socket(int sockfd) : sockfd_(sockfd)
-{
+Socket::Socket(int sockfd) : sockfd_(sockfd) {
     sockState_ = SockOk;
 }
 
-Socket::~Socket()
-{
+Socket::~Socket() {
     ::close(sockfd_);
 }
 
-int Socket::fd() const
-{
+int Socket::fd() const {
     return sockfd_;
 }
 
-void Socket::bind(const InetAddr &addr)
-{
+void Socket::bind(const InetAddr &addr) {
     if (sockState_ != SockOk) {
         printf("this socket[%d] is error\n", sockfd_);
         return;
@@ -48,8 +43,7 @@ void Socket::bind(const InetAddr &addr)
     }
 }
 
-void Socket::listen()
-{
+void Socket::listen() {
     if (sockState_ != SockOk) {
         printf("this socket[%d] is error\n", sockfd_);
         return;
@@ -61,10 +55,9 @@ void Socket::listen()
     }
 }
 
-int Socket::accept(struct sockaddr_in *addr)
-{
+int Socket::accept(struct sockaddr_in *addr) {
     int nAddr = sizeof(*addr);
-    int conn = ::accept(sockfd_, (struct sockaddr *) &addr, (socklen_t * ) & nAddr);
+    int conn = ::accept(sockfd_, (struct sockaddr *) &addr, (socklen_t *) &nAddr);
     if (conn < 0)
         perror("accept");
     return conn;

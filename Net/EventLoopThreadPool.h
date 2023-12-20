@@ -5,7 +5,7 @@
 #ifndef CREACTORSERVER_EVENTLOOPTHREADPOOL_H
 #define CREACTORSERVER_EVENTLOOPTHREADPOOL_H
 
-#include "../Common/noncopyable.h"
+#include "noncopyable.h"
 #include <functional>
 #include <memory>
 #include <vector>
@@ -14,20 +14,20 @@
  * EventLoop工厂 -- 单线程 or 多线程(one loop peer thread)
  */
 
-namespace core::net
-{
+namespace reactor {
     class EventLoop;
 
-    class EventLoopThreadPool : noncopyable
-    {
-        using ThreadInitCallback = std::function<void(EventLoop *)>;
+    class EventLoopThread;
+
+    class EventLoopThreadPool : noncopyable {
+        typedef std::function<void(EventLoop *)> ThreadInitCallback;
     public:
-        EventLoopThreadPool(EventLoop *baseloop);
+        explicit EventLoopThreadPool(EventLoop *baseloop);
         ~EventLoopThreadPool();
 
         void setThreadNum(int numThreads);
         void start(const ThreadInitCallback &cb);
-        bool startd();
+        bool started();
         EventLoop *getNextLoop();
         std::vector<EventLoop *> getAllLoops();
 
@@ -36,6 +36,8 @@ namespace core::net
         bool started_;
         int numThreads_;
         int next_;
+
+        std::vector<std::unique_ptr<EventLoopThread>> threads_;
         std::vector<EventLoop *> loops_;// 每个loop运行时开启一个循环
     };
 }

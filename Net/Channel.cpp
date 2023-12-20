@@ -8,8 +8,7 @@
 #include <poll.h>
 #include <cassert>
 
-using namespace core;
-using namespace core::net;
+using namespace reactor;
 
 const int Channel::kNoneEvent = 0;
 const int Channel::kReadEvent = POLLIN | POLLPRI;
@@ -17,49 +16,27 @@ const int Channel::kWriteEvent = POLLOUT;
 
 Channel::Channel(EventLoop *loop, int fd)
         : ownerLoop_(loop), fd_(fd), events_(0), revents_(0),
-          index_(-1), eventHandling_(false), addedToLoop_(false)
-{}
+          index_(-1), eventHandling_(false), addedToLoop_(false) {}
 
-Channel::~Channel()
-{}
+Channel::~Channel() {}
 
-int Channel::fd() const
-{
-    return fd_;
-}
-
-int Channel::event() const
-{
-    return events_;
-}
-
-int Channel::revent() const
-{
-    return revents_;
-}
-
-void Channel::setCloseCallback(const eventCallback cb)
-{
+void Channel::setCloseCallback(const eventCallback cb) {
     closeCallBack_ = cb;
 }
 
-void Channel::setErrorCallback(const eventCallback cb)
-{
+void Channel::setErrorCallback(const eventCallback cb) {
     errorCallBack_ = cb;
 }
 
-void Channel::setReadCallback(const eventCallback cb)
-{
+void Channel::setReadCallback(const eventCallback cb) {
     readCallBack_ = cb;
 }
 
-void Channel::setWriteCallback(const eventCallback cb)
-{
+void Channel::setWriteCallback(const eventCallback cb) {
     writeCallBack_ = cb;
 }
 
-void Channel::handleEvents()
-{
+void Channel::handleEvents() {
     eventHandling_ = true;
     // 断线
     if ((revents_ & POLLHUP) && !(revents_ & POLLIN)) {
@@ -88,80 +65,46 @@ void Channel::handleEvents()
     eventHandling_ = false;
 }
 
-void Channel::update()
-{
+void Channel::update() {
     addedToLoop_ = true;
     ownerLoop_->updateChannel(this);
 }
 
-int Channel::index() const
-{
-    return index_;
-}
-
-void Channel::set_index(int index)
-{
-    index_ = index;
-}
-
-bool Channel::isNoneEvent() const
-{
-    return events_ == kNoneEvent;
-}
-
-void Channel::set_revent(int events)
-{
+void Channel::set_revent(int events) {
     revents_ = events;
 }
 
-void Channel::enableReading()
-{
+void Channel::enableReading() {
     events_ |= kReadEvent;
     update();
 }
 
-void Channel::disableAll()
-{
+void Channel::disableAll() {
     events_ = kNoneEvent;
     update();
 }
 
-bool Channel::isWriting() const
-{
-    return events_ & kWriteEvent;
-}
-
-bool Channel::isReading() const
-{
-    return events_ & kReadEvent;
-}
-
-void Channel::disableReading()
-{
+void Channel::disableReading() {
     events_ &= ~kReadEvent;
     update();
 }
 
-void Channel::enableWriting()
-{
+void Channel::enableWriting() {
     events_ |= kWriteEvent;
     update();
 }
 
-void Channel::disableWriting()
-{
+void Channel::disableWriting() {
     events_ &= ~kWriteEvent;
     update();
 }
 
-void Channel::remove()
-{
+void Channel::remove() {
     assert(isNoneEvent());
     addedToLoop_ = false;
     ownerLoop_->removeChannel(this);
 }
 
-EventLoop *Channel::getLoop() const
-{
+EventLoop *Channel::getLoop() const {
     return ownerLoop_;
 }

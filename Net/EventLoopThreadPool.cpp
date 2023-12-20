@@ -4,45 +4,45 @@
 
 #include "EventLoopThreadPool.h"
 #include "EventLoop.h"
+#include "EventLoopThread.h"
 #include <cassert>
 
-using namespace core;
-using namespace core::net;
+using namespace reactor;
 
 EventLoopThreadPool::EventLoopThreadPool(EventLoop *baseloop)
-        : baseloop_(baseloop), started_(false),
-          numThreads_(0), next_(0)
-{}
+        : baseloop_(baseloop),
+          started_(false),
+          numThreads_(0),
+          next_(0) {}
 
-EventLoopThreadPool::~EventLoopThreadPool()
-{}
+EventLoopThreadPool::~EventLoopThreadPool() {}
 
-void EventLoopThreadPool::setThreadNum(int numThreads)
-{
+void EventLoopThreadPool::setThreadNum(int numThreads) {
     numThreads_ = numThreads;
 }
 
-void EventLoopThreadPool::start(const ThreadInitCallback &cb)
-{
-    // one loop peer thread
+void EventLoopThreadPool::start(const ThreadInitCallback &cb) {
     assert(!started_);
+
+    // one loop peer thread
     baseloop_->assertInLoopThread();
     started_ = true;
     for (int i = 0; i < numThreads_; i++) {
-        // ...
-        numThreads_ = 0;
+        EventLoopThread *t = new EventLoopThread(cb);
+        threads_.push_back(std::unique_ptr<EventLoopThread>(t));
+        loops_.push_back(t->startLoop());
     }
-    if (numThreads_ == 0 && cb)// 单线程
+    // 单线程
+    if (numThreads_ == 0 && cb) {
         cb(baseloop_);
+    }
 }
 
-bool EventLoopThreadPool::startd()
-{
+bool EventLoopThreadPool::started() {
     return started_;
 }
 
-EventLoop *EventLoopThreadPool::getNextLoop()
-{
+EventLoop *EventLoopThreadPool::getNextLoop() {
     baseloop_->assertInLoopThread();
     assert(started_);
     EventLoop *loop = baseloop_;
@@ -57,12 +57,12 @@ EventLoop *EventLoopThreadPool::getNextLoop()
     return loop; // 单线程
 }
 
-std::vector<EventLoop *> EventLoopThreadPool::getAllLoops()
-{
+std::vector<EventLoop *> EventLoopThreadPool::getAllLoops() {
     baseloop_->assertInLoopThread();
     assert(started_);
-    if (loops_.empty())
+    if (loops_.empty()) {
         return std::vector<EventLoop *>(1, baseloop_);
-    else
+    } else {
         return loops_;
+    }
 }

@@ -9,18 +9,14 @@
 #include <cassert>
 #include <algorithm>
 
-using namespace core;
-using namespace core::net;
+using namespace reactor;
 
-namespace
-{
+namespace {
     __thread EventLoop *loopOfCurrentThread_ = nullptr;
 }
 
-void EventLoop::assertInLoopThread()
-{
-    // 检查该loop是否是本线程的loop，因为一个io线程同时只能有一个eventloop
-    //assert(threadId_ == std::CurrentThread::tid());
+void EventLoop::assertInLoopThread() {
+    // 检查该loop是否是本线程的loop，防止抢占
 }
 
 EventLoop::EventLoop() :
@@ -30,8 +26,7 @@ EventLoop::EventLoop() :
         threadId_(0), // this_thread::pid
         maxWaitTime(10000),
         poller_(Poller::newDefaultPoller(this)),
-        currentActiveChannel_(nullptr)
-{
+        currentActiveChannel_(nullptr) {
     if (loopOfCurrentThread_) {
         printf("Already has an EventLoop\n");
     } else {
@@ -39,13 +34,11 @@ EventLoop::EventLoop() :
     }
 }
 
-EventLoop::~EventLoop()
-{
+EventLoop::~EventLoop() {
     loopOfCurrentThread_ = nullptr;
 }
 
-void EventLoop::loop()
-{
+void EventLoop::loop() {
     assert(!isLoopping_);
     assertInLoopThread();
     isLoopping_ = true;
@@ -66,13 +59,11 @@ void EventLoop::loop()
     printf("EventLoop::loop() stopped\n");
 }
 
-void EventLoop::updateChannel(Channel *ch)
-{
+void EventLoop::updateChannel(Channel *ch) {
     poller_->updateChannel(ch);
 }
 
-void EventLoop::removeChannel(Channel *ch)
-{
+void EventLoop::removeChannel(Channel *ch) {
     // 关闭channal要考虑目标是否还在运行 -- 是不是活动channel
     assert(ch->getLoop() == this);
     assertInLoopThread();
@@ -82,12 +73,10 @@ void EventLoop::removeChannel(Channel *ch)
     poller_->removeChannel(ch);
 }
 
-void EventLoop::quit()
-{
+void EventLoop::quit() {
     quit_ = true;
 }
 
-void EventLoop::runInLoop(EventLoop::Functor cb)
-{
+void EventLoop::runInLoop(EventLoop::Functor cb) {
     cb();
 }

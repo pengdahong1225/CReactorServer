@@ -11,24 +11,20 @@
 #include <iostream>
 #include <cstring>
 
-using namespace core;
-using namespace core::net;
+using namespace reactor;
 
 EpollPoller::EpollPoller(EventLoop *loop) : Poller(loop),
                                             epollfd_(::epoll_create(kInitEventListSize + 1)),
-                                            eventList_(kInitEventListSize)
-{
+                                            eventList_(kInitEventListSize) {
     if (epollfd_ < 0)
         printf("EPollPoller::EPollPoller error\n");
 }
 
-EpollPoller::~EpollPoller()
-{
+EpollPoller::~EpollPoller() {
     ::close(epollfd_);
 }
 
-int EpollPoller::poll(int timeout, Poller::ChannelList *activeChannels)
-{
+int EpollPoller::poll(int timeout, Poller::ChannelList *activeChannels) {
     int numEvents = ::epoll_wait(epollfd_, &*eventList_.begin(), static_cast<int>(eventList_.size()), -1);
     if (numEvents > 0) {
         fillActiveChannels(numEvents, activeChannels);
@@ -39,8 +35,7 @@ int EpollPoller::poll(int timeout, Poller::ChannelList *activeChannels)
     return numEvents;
 }
 
-void EpollPoller::updateChannel(Channel *channel)
-{
+void EpollPoller::updateChannel(Channel *channel) {
     Poller::assertInLoopThread();
     const int index = channel->index();
     if (index == kNew || index == kDeleted) {
@@ -70,8 +65,7 @@ void EpollPoller::updateChannel(Channel *channel)
     }
 }
 
-void EpollPoller::removeChannel(Channel *channel)
-{
+void EpollPoller::removeChannel(Channel *channel) {
     Poller::assertInLoopThread();
     int fd = channel->fd();
     assert(channelMap_.find(fd) != channelMap_.end());
@@ -86,8 +80,7 @@ void EpollPoller::removeChannel(Channel *channel)
         update(EPOLL_CTL_DEL, channel);
 }
 
-const char *EpollPoller::operationToString(int op)
-{
+const char *EpollPoller::operationToString(int op) {
     switch (op) {
         case EPOLL_CTL_ADD:
             return "ADD";
@@ -101,8 +94,7 @@ const char *EpollPoller::operationToString(int op)
     }
 }
 
-void EpollPoller::fillActiveChannels(int activeNum, Poller::ChannelList *activeChannels)
-{
+void EpollPoller::fillActiveChannels(int activeNum, Poller::ChannelList *activeChannels) {
     assert(activeNum <= eventList_.size());
     for (int i = 0; i < activeNum; i++) {
         Channel *channel = static_cast<Channel *>(eventList_[i].data.ptr);
@@ -111,12 +103,11 @@ void EpollPoller::fillActiveChannels(int activeNum, Poller::ChannelList *activeC
     }
 }
 
-void EpollPoller::memZero(void* ptr, size_t size) {
+void EpollPoller::memZero(void *ptr, size_t size) {
     memset(ptr, 0, size);
 }
 
-void EpollPoller::update(int operation, Channel *channel)
-{
+void EpollPoller::update(int operation, Channel *channel) {
     struct epoll_event event;
     memZero(&event, sizeof event);
     event.events = channel->event();

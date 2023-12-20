@@ -5,38 +5,33 @@
 #ifndef CREACTORSERVER_TCPSERVER_H
 #define CREACTORSERVER_TCPSERVER_H
 
-#include "../Common/noncopyable.h"
-#include "InetAddress.h"
+#include "noncopyable.h"
+#include "InetAddr.h"
 #include "TcpConnection.h"
 #include <vector>
 #include <string>
-#include <memory>
-
+#include <memory>]
 
 /*
  * tcpServer -- 启动中枢
  */
-namespace core::net
-{
+namespace reactor {
     class Acceptor;
-
     class EventLoop;
-
     class EventLoopThreadPool;
 
-    class TcpServer : noncopyable
-    {
+    class TcpServer : noncopyable {
         using ThreadInitCallback = std::function<void(EventLoop *)>;
         using ConnectionMap = std::map<int, TcpConnectionPtr>;
     public:
         TcpServer(EventLoop *loop, InetAddr &addr);
         ~TcpServer();
 
+        void start();
         void setThreadNum(int numThreads);
         void setThreadInitCallback(const ThreadInitCallback &cb);
         void newConnection(int sockfd, InetAddr &peerAddr);
         void removeConnection(const TcpConnectionPtr &conn);
-        void start();
         void setConnectionCallback(const ConnectionCallback &cb);
         void setMessageCallback(const MessageCallback &cb);
         void setWriteCompleteCallback(const WriteCompleteCallback &cb);
@@ -45,9 +40,9 @@ namespace core::net
     private:
         InetAddr addr_; //监听地址
         EventLoop *loop_; // acceptor loop
-        std::unique_ptr <Acceptor> acceptor_; //接收器
+        std::unique_ptr<Acceptor> acceptor_; //接收器
         ConnectionMap connectionMap_; //连接队列(fd,TcpConnection)
-        std::shared_ptr <EventLoopThreadPool> threadPool_; // loop池
+        std::shared_ptr<EventLoopThreadPool> threadPool_; // loop池
 
         ConnectionCallback connectionCallback_;
         MessageCallback messageCallback_;
