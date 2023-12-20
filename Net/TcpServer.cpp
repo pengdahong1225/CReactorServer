@@ -21,7 +21,6 @@ TcpServer::TcpServer(EventLoop *loop, InetAddr &addr)
 }
 
 TcpServer::~TcpServer() {
-    printf("TcpServer::~TcpServer\n");
     for (auto &item: connectionMap_) {
         TcpConnectionPtr conn(item.second);
         item.second.reset();// shared_ptr释放控制权

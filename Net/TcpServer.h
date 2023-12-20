@@ -22,7 +22,6 @@ namespace reactor {
 
     class TcpServer : noncopyable {
         using ThreadInitCallback = std::function<void(EventLoop *)>;
-        using ConnectionMap = std::map<int, TcpConnectionPtr>;
     public:
         TcpServer(EventLoop *loop, InetAddr &addr);
         ~TcpServer();
@@ -41,7 +40,7 @@ namespace reactor {
         InetAddr addr_; //监听地址
         EventLoop *loop_; // acceptor loop
         std::unique_ptr<Acceptor> acceptor_; //接收器
-        ConnectionMap connectionMap_; //连接队列(fd,TcpConnection)
+        std::map<int, TcpConnectionPtr> connectionMap_; //连接队列(fd,TcpConnection)
         std::shared_ptr<EventLoopThreadPool> threadPool_; // loop池
 
         ConnectionCallback connectionCallback_;

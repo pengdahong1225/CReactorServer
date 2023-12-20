@@ -25,8 +25,9 @@ namespace reactor {
         void quit();
         void updateChannel(Channel *ch);
         void removeChannel(Channel *ch);
-        void runInLoop(Functor cb);
         void assertInLoopThread();
+
+        void runInLoop(Functor cb); //
 
     private:
         bool eventHandling_;
@@ -40,7 +41,7 @@ namespace reactor {
 
         std::atomic<bool> quit_; // 原子
 
-        std::vector<Functor> pendingFunctors_; // 任务队列 -- 非主线程的io任务就推到任务队列中
+        std::vector<Functor> pendingFunctors_; // 任务缓存队列
     };
 }
 

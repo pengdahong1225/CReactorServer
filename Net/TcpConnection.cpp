@@ -172,7 +172,7 @@ EventLoop *TcpConnection::getLoop() const {
 }
 
 void TcpConnection::connectDestroyed() {
-    // 销毁链接，要关闭对应的处理器channel
+    // 销毁链接，要关闭对应的处理器
     loop_->assertInLoopThread();
     if (state_ == Connected) {
         setState(DisConnected);
