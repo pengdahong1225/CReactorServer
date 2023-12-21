@@ -53,7 +53,7 @@ namespace reactor {
 
     private:
         State state_;
-        EventLoop *loop_;
+        EventLoop *loop_;// 该连接对应的loop 多线程情况下运行在其他线程中
         const int sockfd_;
         InetAddr addr_;
         std::unique_ptr<Channel> channel_;// 专属处理器

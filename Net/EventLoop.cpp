@@ -77,6 +77,7 @@ void EventLoop::quit() {
     quit_ = true;
 }
 
+// 若调用runInLoop的loop
 void EventLoop::runInLoop(EventLoop::Functor cb) {
     cb();
 }
