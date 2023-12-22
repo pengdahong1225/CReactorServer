@@ -27,7 +27,7 @@ namespace reactor {
         void removeChannel(Channel *ch);
         void assertInLoopThread();
 
-        void runInLoop(Functor cb); //
+        void runInLoop(Functor cb);
 
     private:
         bool eventHandling_;
@@ -37,7 +37,7 @@ namespace reactor {
 
         std::vector<Channel *> activeChannels_; // 有活动的事件Channel
         std::unique_ptr<Poller> poller_; // 一个loop有一个poller
-        Channel *currentActiveChannel_;
+        Channel *currentActiveChannel_; // 当前时间正在处理的channel
 
         std::atomic<bool> quit_; // 原子
 

@@ -45,6 +45,7 @@ void TcpConnection::send(const std::string &msg) {
     }
 }
 
+// 可读事件回调
 void TcpConnection::handleRead() {
     loop_->assertInLoopThread();
     size_t n = inputBuffer_.readFd(sockfd_);

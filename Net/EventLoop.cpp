@@ -43,7 +43,7 @@ void EventLoop::loop() {
     assertInLoopThread();
     isLoopping_ = true;
     quit_ = false;
-    // 轮训
+    // 轮询
     while (!quit_) {
         activeChannels_.clear();
         poller_->poll(maxWaitTime, &activeChannels_);// poller入口
