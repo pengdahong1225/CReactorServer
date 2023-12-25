@@ -10,12 +10,10 @@ using namespace reactor;
 EventLoopThread::EventLoopThread(const EventLoopThread::ThreadInitCallback &cb)
         : callback_(cb),
           loop_(nullptr),
-          thread_(nullptr),
-          exiting_(false) {
+          thread_(nullptr) {
 }
 
 EventLoopThread::~EventLoopThread() {
-    exiting_ = true;
     if (loop_ != nullptr) {
         loop_->quit();
         thread_->join();

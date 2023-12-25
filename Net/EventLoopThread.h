@@ -28,8 +28,6 @@ namespace reactor{
         void threadFunc();
 
     private:
-        bool exiting_;
-
         /*
          * 该线程中运行的loop：one loop peer thread
          * loop负责调用poller获取活动的事件并回调

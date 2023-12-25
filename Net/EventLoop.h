@@ -10,6 +10,7 @@
 #include <vector>
 #include <memory>
 #include <atomic>
+#include <thread>
 
 namespace reactor {
     class Channel;
@@ -27,21 +28,35 @@ namespace reactor {
         void removeChannel(Channel *ch);
         void assertInLoopThread();
 
+        // work
         void runInLoop(Functor cb);
+        void queueInLoop(Functor cb);
 
     private:
-        bool eventHandling_;
-        bool isLoopping_;
-        int maxWaitTime;
-        const pid_t threadId_;
+        bool isInLoopThread() const{
+            return std::this_thread::get_id() == threadId_;
+        }
+        void doPendingFunctors();
+        void wakeup();
+        void handleRead();  // waked up
 
-        std::vector<Channel *> activeChannels_; // 有活动的事件Channel
+    private:
+        std::atomic<bool> isLoopping_;  // loop是否在运行
+        bool eventHandling_;            // loop是否处于事件[io事件]的处理中
+        bool callingPendingFunctors_;   // loop是否在处理队列中的任务
+        int maxWaitTime;                // poller超时
+        const std::thread::id threadId_; // 当前线程的pid
+
         std::unique_ptr<Poller> poller_; // 一个loop有一个poller
+        std::vector<Channel *> activeChannels_; // 有活动的事件Channel
         Channel *currentActiveChannel_; // 当前时间正在处理的channel
 
-        std::atomic<bool> quit_; // 原子
-
+        std::mutex mtx_;
         std::vector<Functor> pendingFunctors_; // 任务缓存队列
+
+        // 及时唤醒机制
+        int wakeupFd_;
+        std::unique_ptr<Channel> wakeupChannel_;
     };
 }
 
