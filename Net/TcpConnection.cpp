@@ -76,10 +76,12 @@ void TcpConnection::handleWrite() {
                 if (state_ == DisConnecting)
                     shutdownInLoop();
             }
-        } else
+        } else {
             printf("Error -> TcpConnection::handleWrite\n");
-    } else
+        }
+    } else {
         printf("Connection fd = [%d] is down, no more writing\n", sockfd_);
+    }
 }
 
 void TcpConnection::handleClose() {

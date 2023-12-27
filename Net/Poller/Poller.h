@@ -18,11 +18,12 @@ namespace reactor {
     class Channel;
 
     class Poller : noncopyable {
+    protected:
         using ChannelList = std::vector<Channel *>;
         using ChannelMap = std::map<int, Channel *>; //(fd,Channel*)
-    public:
 
-        Poller(EventLoop *loop);
+    public:
+        explicit Poller(EventLoop *loop);
         virtual ~Poller();
 
         virtual int poll(int timeout, ChannelList *activeChannels) = 0;

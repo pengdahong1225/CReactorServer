@@ -16,8 +16,10 @@ using namespace reactor;
 EpollPoller::EpollPoller(EventLoop *loop) : Poller(loop),
                                             epollfd_(::epoll_create(kInitEventListSize + 1)),
                                             eventList_(kInitEventListSize) {
-    if (epollfd_ < 0)
+    if (epollfd_ < 0) {
         printf("EPollPoller::EPollPoller error\n");
+        abort();
+    }
 }
 
 EpollPoller::~EpollPoller() {
@@ -25,13 +27,17 @@ EpollPoller::~EpollPoller() {
 }
 
 int EpollPoller::poll(int timeout, Poller::ChannelList *activeChannels) {
-    int numEvents = ::epoll_wait(epollfd_, &*eventList_.begin(), static_cast<int>(eventList_.size()), -1);
+    int numEvents = ::epoll_wait(epollfd_, &*eventList_.begin(), static_cast<int>(eventList_.size()), timeout);
     if (numEvents > 0) {
         fillActiveChannels(numEvents, activeChannels);
-        if (numEvents == eventList_.size())
+        if (numEvents == eventList_.size()) {
             eventList_.resize(eventList_.size() * 2);
-    } else if (numEvents < 0)
+        }
+    } else if (numEvents == 0) {
+        printf("nothing happened\n");
+    } else {
         printf("EPollPoller::poll() error\n");
+    }
     return numEvents;
 }
 
@@ -60,8 +66,9 @@ void EpollPoller::updateChannel(Channel *channel) {
         if (channel->isNoneEvent()) {
             update(EPOLL_CTL_DEL, channel);
             channel->set_index(kDeleted);
-        } else
+        } else{
             update(EPOLL_CTL_MOD, channel);
+        }
     }
 }
 
@@ -111,8 +118,9 @@ void EpollPoller::update(int operation, Channel *channel) {
     struct epoll_event event;
     memZero(&event, sizeof event);
     event.events = channel->event();
-    event.data.ptr = channel;
+    event.data.ptr = channel; // 绑定事件处理器
     int fd = channel->fd();
-    if (::epoll_ctl(epollfd_, operation, fd, &event) < 0)
+    if (::epoll_ctl(epollfd_, operation, fd, &event) < 0){
         std::cout << "epoll_ctl op = " << operationToString(operation) << " error" << std::endl;
+    }
 }

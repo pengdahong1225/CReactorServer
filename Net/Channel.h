@@ -14,6 +14,13 @@
  * 普通事件过程：poller->eventloop->channel->回调函数
  */
 
+// index
+enum INDEDX{
+    kNew,
+    kAdded,
+    kDeleted
+};
+
 namespace reactor {
     class EventLoop;
 
@@ -71,7 +78,7 @@ namespace reactor {
         int fd_;
         int events_;
         int revents_;
-        int index_;          // default == -1
+        int index_;          // default == -1 ???????
         bool eventHandling_; // 改是否在处理中
         bool addedToLoop_;   // 是否添加到loop中
 

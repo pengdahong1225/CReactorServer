@@ -71,6 +71,7 @@ void EventLoop::assertInLoopThread() {
     // 检查该loop是否是本线程的loop，防止抢占
 }
 
+// 通过修改channel的关心事件，再调用EventLoop::updateChannel去映射修改poller中的关心事件
 void EventLoop::updateChannel(Channel *ch) {
     assert(ch->getLoop() == this);
     poller_->updateChannel(ch);
@@ -96,6 +97,7 @@ void EventLoop::quit() {
 }
 
 void EventLoop::runInLoop(EventLoop::Functor cb) {
+    // 任务都必须与eventloop绑定的线程才能执行
     if (isInLoopThread()) {
         cb();
     } else {

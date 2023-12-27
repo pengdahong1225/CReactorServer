@@ -52,19 +52,19 @@ namespace reactor {
         void shutdownInLoop();
 
     private:
-        State state_;
         EventLoop *loop_;// 该连接对应的loop 多线程情况下运行在其他线程中
         const int sockfd_;
         InetAddr addr_;
+        State state_;
         std::unique_ptr<Channel> channel_;// 专属处理器
+        Buffer inputBuffer_;// 接收缓冲区
+        Buffer outputBuffer_;// 发送缓冲区
+        Codec codec_;
+
         ConnectionCallback connectionCallback_;
         MessageCallback messageCallback_;
         CloseCallback closeCallback_;
         WriteCompleteCallback writeCompleteCallback_;
-
-        Buffer inputBuffer_;// 接收缓冲区
-        Buffer outputBuffer_;// 发送缓冲区
-        Codec codec_;
     };
 }
 

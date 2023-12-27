@@ -66,7 +66,9 @@ void Channel::handleEvents() {
 }
 
 void Channel::update() {
-    addedToLoop_ = true;
+    if (!addedToLoop_) {
+        addedToLoop_ = true;
+    }
     ownerLoop_->updateChannel(this);
 }
 

@@ -10,11 +10,7 @@
 /*
  * epoll
  */
-namespace {
-    const int kNew = -1;
-    const int kAdded = 1;
-    const int kDeleted = 2;
-}
+
 struct epoll_event;
 
 namespace reactor {
