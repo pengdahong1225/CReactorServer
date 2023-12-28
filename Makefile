@@ -2,7 +2,7 @@ CC  = gcc
 CXX = g++
 GCCVER := $(shell $(CC) -dumpversion | awk -F. '{ print $$1"."$$2}' )
 
-OPT     = -pipe -fno-ident -fPIC -shared -z defs 
+OPT = -pipe -fno-ident -fPIC -shared -z defs
 CFLAGS += $(OPT) -g -pg -Wall -D_GNU_SOURCE -funroll-loops -MMD -D_REENTRANT -Wno-invalid-offsetof
 ifeq ($(MEMCHECK),1)
 CFLAGS += -DMEMCHECK
@@ -11,12 +11,12 @@ endif
 CXXFLAGS = -std=c++2a -Wall -g -pipe -rdynamic -fno-strict-aliasing -Wno-unused-function -Wno-sign-compare -fpermissive -Wno-invalid-offsetof
 CXXFLAGS += $(CFLAGS)
 
-LINK = -lpthread -lhiredis
+LINK = -lpthread
 
-INC	= -I. -I./Base -I./Common  -I./Net -I./Net/Poller -I../libs/hiredis -I../libs/google
+INC	= -I. -I./Base -I./Common  -I./Net -I./Net/Poller
 SRCS = $(wildcard ./*.cpp) $(wildcard Base/*.cpp) $(wildcard Common/*.cpp) $(wildcard Net/*.cpp) $(wildcard Net/Poller/*.cpp)
 
-COMPILE_LIB_HOME = ../libs/
+COMPILE_LIB_HOME = ./libs/
 DYNAMIC_NAME = libreactor.so
 STATIC_NAME = libreactor.a
 DYNAMIC_LIB	= $(COMPILE_LIB_HOME)/$(DYNAMIC_NAME)
