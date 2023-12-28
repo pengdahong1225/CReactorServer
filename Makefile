@@ -26,11 +26,9 @@ all: $(DYNAMIC_LIB) $(STATIC_LIB)
 
 $(DYNAMIC_LIB): $(SRCS:.cpp=.o) 
 	$(CXX) -pg -o $@ $^ $(CXXFLAGS) $(LINK)
-	cp $(DYNAMIC_LIB) .
 
 $(STATIC_LIB): $(SRCS:.cpp=.o)
 	@ar cr $@ $^
-	cp $(STATIC_LIB) .
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INC) -c -pg -o $@ $<
