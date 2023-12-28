@@ -6,6 +6,7 @@
 #define CREACTORSERVER_SOCKET_H
 
 #include <sys/socket.h>
+#include <>
 #include "noncopyable.h"
 #include "InetAddr.h"
 
@@ -32,7 +33,7 @@ public:
 
 private:
     const int sockfd_;
-    struct sockaddr_in sin_;
+    struct sockaddr_in sin_{};
     state sockState_;
 };
 

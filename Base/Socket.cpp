@@ -11,8 +11,9 @@
 int Socket::createSockForTCPV4() {
     // 可以选择阻塞和非阻塞
     int fd = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (fd < 0)
+    if (fd < 0) {
         perror("scoket");
+    }
     return fd;
 }
 
@@ -58,7 +59,8 @@ void Socket::listen() {
 int Socket::accept(struct sockaddr_in *addr) {
     int nAddr = sizeof(*addr);
     int conn = ::accept(sockfd_, (struct sockaddr *) &addr, (socklen_t *) &nAddr);
-    if (conn < 0)
+    if (conn < 0) {
         perror("accept");
+    }
     return conn;
 }
