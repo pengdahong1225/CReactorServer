@@ -16,7 +16,7 @@ LINK = -lpthread
 INC	= -I. -I./Base -I./Common  -I./Net -I./Net/Poller
 SRCS = $(wildcard ./*.cpp) $(wildcard Base/*.cpp) $(wildcard Common/*.cpp) $(wildcard Net/*.cpp) $(wildcard Net/Poller/*.cpp)
 
-COMPILE_LIB_HOME = ./libs
+COMPILE_LIB_HOME = ./
 DYNAMIC_NAME = libreactor.so
 STATIC_NAME = libreactor.a
 DYNAMIC_LIB	= $(COMPILE_LIB_HOME)/$(DYNAMIC_NAME)
