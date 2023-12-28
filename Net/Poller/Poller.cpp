@@ -21,7 +21,7 @@ bool Poller::hasChannel(Channel *channel) const {
 }
 
 Poller *Poller::newDefaultPoller(EventLoop *loop) {
-#ifdef D_POLL
+#ifdef _POLL
     return new PollPoller(loop);
 #endif
     return new EpollPoller(loop);

@@ -24,13 +24,13 @@ namespace reactor {
         void removeChannel(Channel *channel) override;
 
     private:
-        static const int kInitEventListSize = 16;
         static const char *operationToString(int op);
         void fillActiveChannels(int activeNum, ChannelList *activeChannels);
         void update(int operation, Channel *channel);
         void memZero(void *ptr, size_t size);
 
     private:
+        static const int kInitEventListSize = 16;
         std::vector<struct epoll_event> eventList_;
         int epollfd_;
     };

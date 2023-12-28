@@ -15,6 +15,8 @@
  */
 namespace reactor {
     class PollPoller : public Poller {
+
+
     public:
         explicit PollPoller(EventLoop *loop);
         ~PollPoller() override;
@@ -27,6 +29,7 @@ namespace reactor {
         void fillActiveChannels(int activeNum, ChannelList *activeChannels);
 
     private:
+        std::map<int, struct pollfd> pollfdsMap_;
         std::vector<struct pollfd> pollfds_;
     };
 }

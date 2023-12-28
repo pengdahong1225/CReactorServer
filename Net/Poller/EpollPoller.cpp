@@ -43,30 +43,30 @@ int EpollPoller::poll(int timeout, Poller::ChannelList *activeChannels) {
 
 void EpollPoller::updateChannel(Channel *channel) {
     Poller::assertInLoopThread();
-    const int index = channel->index();
-    if (index == kNew || index == kDeleted) {
-        // a new one, add with EPOLL_CTL_ADD
+    State state = channel->state();
+    // 新的channel or 已经从poller中删掉的channel
+    if (state == EN_New || state == EN_Deleted) {
         int fd = channel->fd();
-        if (index == kNew) {
+        if (state == EN_New) {
             assert(channelMap_.find(fd) == channelMap_.end());
             channelMap_[fd] = channel;
         } else {
             assert(channelMap_.find(fd) != channelMap_.end());
             assert(channelMap_[fd] == channel);
         }
-        channel->set_index(kAdded);
+        channel->setState(EN_Added);
         update(EPOLL_CTL_ADD, channel);
     } else {
-        // update existing one with EPOLL_CTL_MOD/DEL
+        // 已经在poller集合中的channel
         int fd = channel->fd();
-        (void) fd;
         assert(channelMap_.find(fd) != channelMap_.end());
         assert(channelMap_[fd] == channel);
-        assert(index == kAdded);
+        assert(state == EN_Added);
         if (channel->isNoneEvent()) {
+            // channel取消了所有的事件关心，意味着就可以删了
             update(EPOLL_CTL_DEL, channel);
-            channel->set_index(kDeleted);
-        } else{
+            channel->setState(EN_Deleted);
+        } else {
             update(EPOLL_CTL_MOD, channel);
         }
     }
@@ -78,13 +78,12 @@ void EpollPoller::removeChannel(Channel *channel) {
     assert(channelMap_.find(fd) != channelMap_.end());
     assert(channelMap_[fd] == channel);
     assert(channel->isNoneEvent());
-    int index = channel->index();
-    assert(index == kAdded || index == kDeleted);
-    size_t n = channelMap_.erase(fd);
-    (void) n;
-    assert(n == 1);
-    if (index == kAdded)
+    State state = channel->state();
+    assert(state == EN_Added || state == EN_Deleted);
+    channelMap_.erase(fd);
+    if (state == EN_Added) {
         update(EPOLL_CTL_DEL, channel);
+    }
 }
 
 const char *EpollPoller::operationToString(int op) {
@@ -120,7 +119,7 @@ void EpollPoller::update(int operation, Channel *channel) {
     event.events = channel->event();
     event.data.ptr = channel; // 绑定事件处理器
     int fd = channel->fd();
-    if (::epoll_ctl(epollfd_, operation, fd, &event) < 0){
+    if (::epoll_ctl(epollfd_, operation, fd, &event) < 0) {
         std::cout << "epoll_ctl op = " << operationToString(operation) << " error" << std::endl;
     }
 }

@@ -27,7 +27,7 @@ namespace reactor {
         virtual ~Poller();
 
         virtual int poll(int timeout, ChannelList *activeChannels) = 0;
-        virtual void updateChannel(Channel *channel) = 0; // 添加一个 IO event
+        virtual void updateChannel(Channel *channel) = 0;
         virtual void removeChannel(Channel *channel) = 0;
         virtual bool hasChannel(Channel *channel) const;
 

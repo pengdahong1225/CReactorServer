@@ -16,7 +16,7 @@ const int Channel::kWriteEvent = POLLOUT;
 
 Channel::Channel(EventLoop *loop, int fd)
         : ownerLoop_(loop), fd_(fd), events_(0), revents_(0),
-          index_(-1), eventHandling_(false), addedToLoop_(false) {}
+          state_(EN_New), eventHandling_(false), addedToLoop_(false) {}
 
 Channel::~Channel() {}
 
@@ -65,8 +65,10 @@ void Channel::handleEvents() {
     eventHandling_ = false;
 }
 
+// 将更新的关心事件同步到poller中
 void Channel::update() {
     if (!addedToLoop_) {
+        // 第一次更新，算加入poller集合
         addedToLoop_ = true;
     }
     ownerLoop_->updateChannel(this);
@@ -109,4 +111,36 @@ void Channel::remove() {
 
 EventLoop *Channel::getLoop() const {
     return ownerLoop_;
+}
+
+int Channel::fd() const {
+    return fd_;
+}
+
+int Channel::event() const {
+    return events_;
+}
+
+int Channel::revent() const {
+    return revents_;
+}
+
+State Channel::state() const {
+    return state_;
+}
+
+void Channel::setState(reactor::State s) {
+    state_ = s;
+}
+
+bool Channel::isWriting() const {
+    return events_ & kWriteEvent;
+}
+
+bool Channel::isReading() const {
+    return events_ & kReadEvent;
+}
+
+bool Channel::isNoneEvent() const {
+    return events_ == kNoneEvent;
 }
