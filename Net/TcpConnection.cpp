@@ -119,7 +119,7 @@ void TcpConnection::setCloseCallback(const CloseCallback &cb) {
     closeCallback_ = cb;
 }
 
-void TcpConnection::setState(State s) {
+void TcpConnection::setState(ConnectionState s) {
     state_ = s;
 }
 

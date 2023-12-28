@@ -18,7 +18,7 @@
 namespace reactor {
     class Channel;
     class EventLoop;
-    enum State {
+    enum ConnectionState {
         Connecting,
         Connected,
         DisConnecting,
@@ -45,7 +45,7 @@ namespace reactor {
         void handleWrite();
         void handleError();
         void handleClose();
-        void setState(State s);
+        void setState(ConnectionState s);
         void send(const std::string &msg);
         void sendInLoop(std::string &msg);
         void sendInLoop(const void *data, size_t len);
@@ -55,7 +55,7 @@ namespace reactor {
         EventLoop *loop_;// 该连接对应的loop 多线程情况下运行在其他线程中
         const int sockfd_;
         InetAddr addr_;
-        State state_;
+        ConnectionState state_;
         std::unique_ptr<Channel> channel_;// 专属处理器
         Buffer inputBuffer_;// 接收缓冲区
         Buffer outputBuffer_;// 发送缓冲区
