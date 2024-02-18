@@ -48,7 +48,7 @@ namespace reactor {
         const std::thread::id threadId_; // 当前线程的pid
 
         std::unique_ptr<Poller> poller_; // 一个loop有一个poller
-        std::vector<Channel *> activeChannels_; // 有活动的事件Channel
+        std::vector<Channel *> activeChannels_; // 有活动的事件Channel，多线程情况下，只会有一个
         Channel *currentActiveChannel_; // 当前时间正在处理的channel
 
         std::mutex mtx_;

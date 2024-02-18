@@ -103,7 +103,7 @@ const char *EpollPoller::operationToString(int op) {
 void EpollPoller::fillActiveChannels(int activeNum, Poller::ChannelList *activeChannels) {
     assert(activeNum <= eventList_.size());
     for (int i = 0; i < activeNum; i++) {
-        Channel *channel = static_cast<Channel *>(eventList_[i].data.ptr);
+        Channel *channel = static_cast<Channel *>(eventList_[i].data.ptr);  // todo ???
         channel->set_revent(eventList_[i].events);
         activeChannels->push_back(channel);
     }
