@@ -112,7 +112,7 @@ void EventLoop::queueInLoop(EventLoop::Functor cb) {
         pendingFunctors_.push_back(std::move(cb));
     }
     // 不是当前IO线程肯定要唤醒
-    // 此外，如果正在调用Pending functor，也要唤醒；（为什么？，因为如果正在执行PendingFunctor里面，
+    // 此外，如果正在调用Pending functor，也要唤醒；（因为如果正在执行PendingFunctor里面，
     // 如果也执行了queueLoop，如果不唤醒的话，新加的cb就不会立即执行了。）
     if (!isInLoopThread() || callingPendingFunctors_) {
         wakeup();

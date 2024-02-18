@@ -35,7 +35,7 @@ void TcpServer::start() {
 }
 
 void TcpServer::newConnection(int sockfd, InetAddr &peerAddr) {
-    // 获取一个loop线程
+    // 获取一个 loop线程
     EventLoop *ioloop = threadPool_->getNextLoop();
     TcpConnectionPtr conn(new TcpConnection(ioloop, sockfd, peerAddr));
     connectionMap_[sockfd] = conn;

@@ -14,25 +14,27 @@ EventLoopThread::EventLoopThread(const EventLoopThread::ThreadInitCallback &cb)
 }
 
 EventLoopThread::~EventLoopThread() {
+    // 非正常退出
     if (loop_ != nullptr) {
         loop_->quit();
         thread_->join();
     }
 }
 
-// 启动线程，并尝试获取loop
+// 启动线程，并尝试绑定一个eventloop
 EventLoop *EventLoopThread::startLoop() {
     // 初始化线程
     assert(thread_ == nullptr);
-    thread_ = new std::thread([this] { threadFunc(); });
+    thread_ = new std::thread([this] { threadFunc(); }); // 线程入口
 
+    // todo 线程启动之后，本线程(base线程)将等待新线程绑定一个eventloop成功，否则本线程挂起
     EventLoop *loop = nullptr;
     {
         std::unique_lock<std::mutex> lock(mtx_);
-        while (loop_ == nullptr) { // 被唤醒之后还是会判断一次，防止虚假唤醒
-            cv_.wait(lock);
+        while (loop_ == nullptr) {  // 防止虚假唤醒
+            cv_.wait(lock); // 线程将被挂起并释放关联的互斥锁 lock
         }
-        loop = loop_; // 被唤醒说明已经拿到了loop
+        loop = loop_;   // 被唤醒说明已经拿到了loop
     }
 
     return loop;
@@ -40,16 +42,17 @@ EventLoop *EventLoopThread::startLoop() {
 
 // 线程入口函数
 void EventLoopThread::threadFunc() {
-    EventLoop loop;
+    EventLoop loop; // todo 直接定义一个新的eventloop
 
     if (callback_) {
         callback_(&loop);
     }
 
     {
+        // 唤醒 父线程
         std::unique_lock<std::mutex> lock(mtx_);
         loop_ = &loop;
-        cv_.notify_one();   // 唤醒调用startLoop的线程
+        cv_.notify_one();
     }
 
     /*
@@ -59,7 +62,7 @@ void EventLoopThread::threadFunc() {
      */
     loop.loop();
 
-    // 退出
+    // 正常退出前 取消绑定eventloop
     std::unique_lock<std::mutex> lock(mtx_);
     loop_ = nullptr;
 }

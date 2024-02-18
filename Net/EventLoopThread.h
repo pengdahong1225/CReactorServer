@@ -2,10 +2,6 @@
 // Created by Messi on 2023/6/5.
 //
 
-/*
- * loop线程
- */
-
 #include "noncopyable.h"
 #include <functional>
 #include <string>
@@ -13,6 +9,10 @@
 #include <mutex>
 #include <condition_variable>
 
+/*
+ * loop线程类
+ * 将线程和loop一对一绑定，等待被消费者获取
+ */
 namespace reactor{
     class EventLoop;
 
