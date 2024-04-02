@@ -14,6 +14,8 @@
 #include <condition_variable>
 #include <functional>
 
+#define MaxThreadCount 100
+
 class ThreadPool : noncopyable {
     typedef std::function<void()> Task;
 public:
@@ -32,7 +34,9 @@ private:
     std::vector<std::unique_ptr<std::thread>> threads;
     std::atomic_bool running;
     std::condition_variable cv_;
-    size_t maxSize;
+    size_t size;
+
+    // 任务队列
     std::queue<Task> queue_;
     std::mutex mtx_;
 };

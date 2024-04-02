@@ -19,6 +19,5 @@ aux_source_directory(Common SRCS)
 aux_source_directory(Base SRCS)
 aux_source_directory(Net SRCS)
 aux_source_directory(Net/Poller SRCS)
-aux_source_directory(Log SRCS)
 
 add_library(${TARGET} STATIC ${SRCS})

@@ -5,7 +5,7 @@
 #include "ThreadPool.h"
 #include <cassert>
 
-ThreadPool::ThreadPool(int count) : maxSize(count) {
+ThreadPool::ThreadPool(int count) : size(count) {
 }
 
 ThreadPool::~ThreadPool() {
@@ -16,27 +16,46 @@ ThreadPool::~ThreadPool() {
 
 void ThreadPool::start() {
     assert(threads.empty());
-    maxSize = maxSize < 1 ? 1 : maxSize;
-    threads.reserve(maxSize);
-    for (int i = 0; i < maxSize; i++) {
-
+    if (size < 1) {
+        size = 1;
     }
+    else if (size > MaxThreadCount) {
+        size = MaxThreadCount;
+    }
+
+    threads.reserve(size);
+    for (int i = 0; i < size; i++) {
+        threads.push_back(std::make_unique<std::thread>(&ThreadPool::runInThread, this));
+    }
+    running = true;
 }
 
 void ThreadPool::stop() {
-
+    running = false;
+    this->cv_.notify_all();
+    for (auto &item: threads) {
+        if (item->joinable()) {
+            item->join();
+        }
+    }
 }
 
+// 线程入口
 void ThreadPool::runInThread() {
-
+    while (running) {
+        Task task = take();
+        if (task) {
+            task();
+        }
+    }
 }
 
 ThreadPool::Task ThreadPool::take() {
     std::unique_lock<std::mutex> lock(mtx_);
 
-    // 如果任务队列为空，线程睡眠等待，直到被其他线程notify
+    // 如果任务队列为空，线程睡眠等待，等待notify
     while (queue_.empty() && running) {
-        cv_.wait(lock);
+        cv_.wait(lock); // 释放锁，线程睡眠
     }
     Task task;
     if (running) {
@@ -47,5 +66,9 @@ ThreadPool::Task ThreadPool::take() {
 }
 
 void ThreadPool::submit(ThreadPool::Task &task) {
-
+    {
+        std::unique_lock<std::mutex> lock(mtx_);
+        queue_.push(task);
+    }
+    cv_.notify_one();
 }
