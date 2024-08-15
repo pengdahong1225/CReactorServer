@@ -10,7 +10,7 @@
 using namespace reactor;
 
 Acceptor::Acceptor(EventLoop *loop, const InetAddr &addr)
-        : loop_(loop), acceptSocket_(Socket::createSockForTCPV4()),
+        : loop_(loop), acceptSocket_(Socket::createNonblocking()),
           acceptChannel_(loop, acceptSocket_.fd()) {
     acceptSocket_.bind(addr);
     listening_ = false;

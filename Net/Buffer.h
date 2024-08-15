@@ -34,9 +34,9 @@ namespace reactor {
         size_t readableBytes();
         size_t writeableBytes();
         size_t prependableBytes();
-        ssize_t readFd(int fd);// 内核缓冲区 -> 用户缓冲区
+        ssize_t readFd(int fd); // 内核缓冲区 -> 用户缓冲区
         void append(const char *data, size_t len);
-        void ensureWriteableBytes(size_t len);// 确保空间充足 不够就扩充
+        void ensureWriteableBytes(size_t len);  // 确保空间充足，不够就扩充
         void hasWritten(size_t len);
         const char *peek() const;
         void retrieve(size_t len);
@@ -67,4 +67,4 @@ namespace reactor {
     };
 }
 
-#endif //CREACTORSERVER_BUFFER_H+++
+#endif //CREACTORSERVER_BUFFER_H

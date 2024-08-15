@@ -8,14 +8,6 @@
 #include <arpa/inet.h>
 #include "Socket.h"
 
-int Socket::createSockForTCPV4() {
-    // 可以选择阻塞和非阻塞
-    int fd = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (fd < 0) {
-        perror("scoket");
-    }
-    return fd;
-}
 
 Socket::Socket(int sockfd) : sockfd_(sockfd) {
     sockState_ = SockOk;
@@ -58,9 +50,25 @@ void Socket::listen() {
 
 int Socket::accept(struct sockaddr_in *addr) {
     int nAddr = sizeof(*addr);
-    int conn = ::accept(sockfd_, (struct sockaddr *) &addr, (socklen_t *) &nAddr);
+    int conn = ::accept4(sockfd_, (struct sockaddr *) &addr, (socklen_t *) &nAddr, SOCK_NONBLOCK | SOCK_CLOEXEC);
     if (conn < 0) {
-        perror("accept");
+        perror("accept4");
     }
     return conn;
+}
+
+int Socket::createSockForTCPV4() {
+    int fd = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (fd < 0) {
+        perror("socket");
+    }
+    return fd;
+}
+
+int Socket::createNonblocking() {
+    int sockfd = ::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP);
+    if (sockfd < 0) {
+        perror("socket");
+    }
+    return sockfd;
 }

@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "noncopyable.h"
-#include "InetAddr.h"
+#include "Common.h"
 
 /*
  * socket细节
@@ -30,6 +30,7 @@ public:
 
 public:
     static int createSockForTCPV4();
+    static int createNonblocking();
 
 private:
     const int sockfd_;
