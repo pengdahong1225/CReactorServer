@@ -7,9 +7,8 @@
 
 using namespace reactor;
 
-EventLoopThread::EventLoopThread(const EventLoopThread::ThreadInitCallback &cb)
-        : callback_(cb),
-          loop_(nullptr),
+EventLoopThread::EventLoopThread()
+        : loop_(nullptr),
           thread_(nullptr) {
 }
 
@@ -21,13 +20,13 @@ EventLoopThread::~EventLoopThread() {
     }
 }
 
-// 启动线程，并尝试绑定一个eventloop
+// 启动线程，并尝试绑定一个loop
 EventLoop *EventLoopThread::startLoop() {
-    // 初始化线程
+    // 线程入口
     assert(thread_ == nullptr);
-    thread_ = new std::thread([this] { threadFunc(); }); // 线程入口
+    thread_ = new std::thread([this] { threadFunc(); });
 
-    // todo 线程启动之后，本线程(base线程)将等待新线程绑定一个eventloop成功，否则本线程挂起
+    // 子线程启动之后会绑定一个eventloop，本线程将等待其绑定成功，否则将挂起
     EventLoop *loop = nullptr;
     {
         std::unique_lock<std::mutex> lock(mtx_);
@@ -40,29 +39,25 @@ EventLoop *EventLoopThread::startLoop() {
     return loop;
 }
 
-// 线程入口函数
 void EventLoopThread::threadFunc() {
-    EventLoop loop; // todo 直接定义一个新的eventloop
-
-    if (callback_) {
-        callback_(&loop);
-    }
+    EventLoop loop;
 
     {
-        // 唤醒 父线程
+        // 唤醒父线程
         std::unique_lock<std::mutex> lock(mtx_);
-        loop_ = &loop;
+        this->loop_ = &loop;
         cv_.notify_one();
     }
 
-    /*
-     * 进入循环
-     * 线程进入loop之后，一开始没有任何感兴趣的事件，就会直接阻塞在系统调用上:"poll/epoll_wait"
+    /**
+     * 进入loop循环，线程进入loop之后，一开始没有任何感兴趣的事件，就会直接阻塞在系统调用上:"poll/epoll_wait"
      * 直到给该loop添加了感兴趣的事件，例如可读，可写
      */
     loop.loop();
 
     // 正常退出前 取消绑定eventloop
-    std::unique_lock<std::mutex> lock(mtx_);
-    loop_ = nullptr;
+    {
+        std::unique_lock<std::mutex> lock(mtx_);
+        loop_ = nullptr;
+    }
 }

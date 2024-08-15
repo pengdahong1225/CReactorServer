@@ -8,7 +8,7 @@
 #include "Channel.h"
 #include "Socket.h"
 #include "noncopyable.h"
-#include "InetAddr.h"
+#include "Common.h"
 
 /*
  * 接收器 -- incoming of Tcp Connections

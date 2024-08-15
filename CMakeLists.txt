@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.23)
 
 set(TARGET net)
 set(CMAKE_CXX_STANDARD 20)
@@ -11,13 +11,11 @@ endif ()
 
 project(${TARGET})
 
-include_directories(Common)
-include_directories(Base)
-
+include_directories(.)
+include_directories(./Common)
 aux_source_directory(. SRCS)
-aux_source_directory(Common SRCS)
-aux_source_directory(Base SRCS)
-aux_source_directory(Net SRCS)
-aux_source_directory(Net/Poller SRCS)
+aux_source_directory(./Common SRCS)
+aux_source_directory(./Interface SRCS)
+aux_source_directory(./Net SRCS)
 
 add_library(${TARGET} STATIC ${SRCS})

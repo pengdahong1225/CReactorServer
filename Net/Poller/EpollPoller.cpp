@@ -30,6 +30,7 @@ int EpollPoller::poll(int timeout, Poller::ChannelList *activeChannels) {
     int numEvents = ::epoll_wait(epollfd_, &*eventList_.begin(), static_cast<int>(eventList_.size()), timeout);
     if (numEvents > 0) {
         fillActiveChannels(numEvents, activeChannels);
+        // 扩容
         if (numEvents == eventList_.size()) {
             eventList_.resize(eventList_.size() * 2);
         }
@@ -103,7 +104,8 @@ const char *EpollPoller::operationToString(int op) {
 void EpollPoller::fillActiveChannels(int activeNum, Poller::ChannelList *activeChannels) {
     assert(activeNum <= eventList_.size());
     for (int i = 0; i < activeNum; i++) {
-        Channel *channel = static_cast<Channel *>(eventList_[i].data.ptr);  // todo ???
+        // 取出对应的处理器channel，并填充事件
+        Channel *channel = static_cast<Channel *>(eventList_[i].data.ptr);
         channel->set_revent(eventList_[i].events);
         activeChannels->push_back(channel);
     }

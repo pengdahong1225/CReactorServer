@@ -5,10 +5,10 @@
 #ifndef CREACTORSERVER_TCPCONNECTION_H
 #define CREACTORSERVER_TCPCONNECTION_H
 
-#include "Callbacks.h"
-#include "Code_c.h"
-#include "InetAddr.h"
+#include "Common.h"
+#include "Interface/Code_c.h"
 #include "Buffer.h"
+#include "Interface/Handler.h"
 #include <string>
 #include <memory>
 
@@ -35,16 +35,17 @@ namespace reactor {
 
         EventLoop *getLoop() const;
         int getSockfd() const;
-        void connectEstablished();
-        void connectDestroyed();
-        void setConnectionCallback(const ConnectionCallback &cb);
-        void setMessageCallback(const MessageCallback &cb);
-        void setCloseCallback(const CloseCallback &cb);
-        void setWriteCompleteCallback(const WriteCompleteCallback &cb);
+
+        // 事件处理
         void handleRead();
         void handleWrite();
-        void handleError();
         void handleClose();
+        void handleError();
+
+        void setHandlerCallback(BaseHandler* h);
+        void setCloseCallback(const std::function<void(const TcpConnectionPtr &)>& cb);
+        void connectEstablished();
+        void connectDestroyed();
         void setState(ConnectionState s);
         void send(const std::string &msg);
         void sendInLoop(std::string &msg);
@@ -53,18 +54,15 @@ namespace reactor {
 
     private:
         EventLoop *loop_;// 该连接对应的loop 多线程情况下运行在其他线程中
-        const int sockfd_;
+        const int fd_;
         InetAddr addr_;
         ConnectionState state_;
         std::unique_ptr<Channel> channel_;// 专属处理器
         Buffer inputBuffer_;// 接收缓冲区
         Buffer outputBuffer_;// 发送缓冲区
         Codec codec_;
-
-        ConnectionCallback connectionCallback_;
-        MessageCallback messageCallback_;
-        CloseCallback closeCallback_;
-        WriteCompleteCallback writeCompleteCallback_;
+        BaseHandler* handler = nullptr; // 应用层handler
+        std::function<void(const TcpConnectionPtr &)> close_callback;
     };
 }
 

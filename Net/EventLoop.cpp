@@ -14,6 +14,10 @@
 
 using namespace reactor;
 
+/**
+ * eventfd 是 Linux 的一个系统调用，用于创建一个文件描述符用于事件通知
+ * @return
+ */
 int createEventfd() {
     int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
     if (evtfd < 0) {
@@ -53,15 +57,16 @@ void EventLoop::loop() {
     // 轮询
     while (isLoopping_) {
         activeChannels_.clear();
-        poller_->poll(maxWaitTime, &activeChannels_);// poller入口
+        // poller入口
+        poller_->poll(maxWaitTime, &activeChannels_);
+        // 处理事件
         eventHandling_ = true;
         for (auto &ch: activeChannels_) {
             currentActiveChannel_ = ch;
-            currentActiveChannel_->handleEvents();// 处理响应事件
+            currentActiveChannel_->handleEvents();
         }
         currentActiveChannel_ = nullptr;
         eventHandling_ = false;
-        doPendingFunctors();
     }
     isLoopping_ = false;
     printf("EventLoop::loop() stopped\n");
@@ -96,12 +101,16 @@ void EventLoop::quit() {
     }
 }
 
+/**
+ * 调用runInLoop去执行cd
+ * 如果调用方是与this绑定的线程，可直接执行
+ * 否则需要调用queueInLoop放入它的任务队列中，并唤醒它
+ * @param cb
+ */
 void EventLoop::runInLoop(EventLoop::Functor cb) {
-    // 任务都必须与eventloop绑定的线程才能执行
     if (isInLoopThread()) {
         cb();
     } else {
-        // 调用者非与eventloop绑定的线程
         queueInLoop(std::move(cb));
     }
 }
@@ -122,6 +131,7 @@ void EventLoop::queueInLoop(EventLoop::Functor cb) {
 // 处理队列中的任务
 void EventLoop::doPendingFunctors() {
     std::vector<Functor> functors;
+    // 使用swap交换，再去处理functors里面的任务，避免长时间占用lock
     callingPendingFunctors_ = true;
     {
         std::unique_lock<std::mutex> lock(this->mtx_);

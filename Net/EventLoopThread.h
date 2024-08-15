@@ -2,6 +2,9 @@
 // Created by Messi on 2023/6/5.
 //
 
+#ifndef CREACTORSERVER_EVENTLOOPTHREAD_H
+#define CREACTORSERVER_EVENTLOOPTHREAD_H
+
 #include "noncopyable.h"
 #include <functional>
 #include <string>
@@ -11,15 +14,14 @@
 
 /*
  * loop线程类
- * 将线程和loop一对一绑定，等待被消费者获取
+ * 将线程和loop一对一绑定 -> one loop peer thread
  */
 namespace reactor{
     class EventLoop;
 
     class EventLoopThread : noncopyable {
-        typedef std::function<void(EventLoop *)> ThreadInitCallback;
     public:
-        explicit EventLoopThread(const ThreadInitCallback &cb = ThreadInitCallback());
+        explicit EventLoopThread();
         ~EventLoopThread();
 
         EventLoop *startLoop();
@@ -28,14 +30,11 @@ namespace reactor{
         void threadFunc();
 
     private:
-        /*
-         * 该线程中运行的loop：one loop peer thread
-         * loop负责调用poller获取活动的事件并回调
-         */
         EventLoop *loop_;
         std::thread *thread_;
         std::mutex mtx_;
         std::condition_variable cv_;
-        ThreadInitCallback callback_;
     };
 }
+
+#endif

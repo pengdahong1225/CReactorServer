@@ -10,35 +10,31 @@
 #include <memory>
 #include <vector>
 
-/*
- * EventLoop工厂 -- 单线程 or 多线程(one loop peer thread)
+/**
+ * EventLoopThread线程池
  */
-
 namespace reactor {
     class EventLoop;
-
     class EventLoopThread;
 
     class EventLoopThreadPool : noncopyable {
-        typedef std::function<void(EventLoop *)> ThreadInitCallback;
     public:
         explicit EventLoopThreadPool(EventLoop *baseloop);
         ~EventLoopThreadPool();
 
         void setThreadNum(int numThreads);
-        void start(const ThreadInitCallback &cb);
+        void start();
         bool started();
         EventLoop *getNextLoop();
         std::vector<EventLoop *> getAllLoops();
 
     private:
         EventLoop *baseloop_;
+        std::vector<std::unique_ptr<EventLoopThread>> threads_;
+        std::vector<EventLoop *> loops_;
         bool started_;
         int numThreads_;
         int next_;
-
-        std::vector<std::unique_ptr<EventLoopThread>> threads_;
-        std::vector<EventLoop *> loops_;// 每个loop运行时开启一个循环
     };
 }
 

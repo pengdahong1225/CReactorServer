@@ -21,20 +21,13 @@ void EventLoopThreadPool::setThreadNum(int numThreads) {
     numThreads_ = numThreads;
 }
 
-void EventLoopThreadPool::start(const ThreadInitCallback &cb) {
+void EventLoopThreadPool::start() {
     assert(!started_);
-
-    // 线程池 one loop peer thread
-    baseloop_->assertInLoopThread();    // 必须是base线程
     started_ = true;
     for (int i = 0; i < numThreads_; i++) {
-        EventLoopThread *t = new EventLoopThread(cb);
+        EventLoopThread *t = new EventLoopThread();
         threads_.push_back(std::unique_ptr<EventLoopThread>(t));
         loops_.push_back(t->startLoop());
-    }
-    // 单线程
-    if (numThreads_ == 0 && cb) {
-        cb(baseloop_);
     }
 }
 
@@ -43,7 +36,7 @@ bool EventLoopThreadPool::started() {
 }
 
 EventLoop *EventLoopThreadPool::getNextLoop() {
-    baseloop_->assertInLoopThread();    // 必须是base线程
+    baseloop_->assertInLoopThread();
     assert(started_);
     EventLoop *loop = baseloop_;
     if (!loops_.empty()) {

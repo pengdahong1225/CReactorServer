@@ -28,18 +28,13 @@ namespace reactor {
         return ptr.get();
     }
 
-    class Buffer;
     class TcpConnection;
-
     using TcpConnectionPtr = std::shared_ptr<TcpConnection>;
-    using ConnectionCallback = std::function<void(const TcpConnectionPtr &)>;
-    using CloseCallback = std::function<void(const TcpConnectionPtr &)>;
-    using MessageCallback = std::function<void(const TcpConnectionPtr &, const std::string &msg)>;
-    using WriteCompleteCallback = std::function<void(const TcpConnectionPtr &)>;
-
-    // 默认函数，业务处理的时候传参替换掉
-    void defaultConnectionCallback(const TcpConnectionPtr &conn);
-    void defaultMessageCallback(const TcpConnectionPtr &, const std::string &);
 }
+
+typedef struct InetAddr {
+    const std::string ip;
+    const int port;
+} InetAddr;
 
 #endif //CREACTORSERVER_CALLBACKS_H
