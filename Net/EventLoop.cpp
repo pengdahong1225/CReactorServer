@@ -104,7 +104,8 @@ void EventLoop::quit() {
 /**
  * 调用runInLoop去执行cd
  * 如果调用方是与this绑定的线程，可直接执行
- * 否则需要调用queueInLoop放入它的任务队列中，并唤醒它
+ * 否则需要调用queueInLoop放入任务队列中并唤醒
+ * 这样该函数可以在其他线程被安全调用，例如·TcpServer::newConnection·
  * @param cb
  */
 void EventLoop::runInLoop(EventLoop::Functor cb) {
