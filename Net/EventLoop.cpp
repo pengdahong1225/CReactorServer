@@ -153,3 +153,7 @@ void EventLoop::handleRead() {
     uint64_t one = 1;
     ssize_t n = ::read(wakeupFd_, &one, sizeof one);
 }
+
+void EventLoop::setThreadID(const std::thread::id &tid) {
+    this->threadId_ = tid;
+}

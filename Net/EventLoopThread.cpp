@@ -46,6 +46,7 @@ void EventLoopThread::threadFunc() {
         // 唤醒父线程
         std::unique_lock<std::mutex> lock(mtx_);
         this->loop_ = &loop;
+        this->loop_->setThreadID(std::this_thread::get_id());
         cv_.notify_one();
     }
 

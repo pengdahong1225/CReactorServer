@@ -27,6 +27,7 @@ namespace reactor {
         void updateChannel(Channel *ch);
         void removeChannel(Channel *ch);
         void assertInLoopThread();
+        void setThreadID(const std::thread::id& tid);
 
         // work
         void runInLoop(Functor cb);
@@ -45,7 +46,7 @@ namespace reactor {
         bool eventHandling_;            // loop是否处于事件[io事件]的处理中
         bool callingPendingFunctors_;   // loop是否在处理队列中的任务
         int maxWaitTime;                // poller超时
-        const std::thread::id threadId_; // 当前线程的pid
+        std::thread::id threadId_; // 当前线程的pid
 
         std::unique_ptr<Poller> poller_; // 一个loop有一个poller
         std::vector<Channel *> activeChannels_; // 有活动的事件Channel，多线程情况下，只会有一个
