@@ -13,8 +13,8 @@ CXXFLAGS += $(CFLAGS)
 
 LINK = -lpthread
 
-INC	= -I. -I./Base -I./Common  -I./Net -I./Net/Poller
-SRCS = $(wildcard ./*.cpp) $(wildcard Base/*.cpp) $(wildcard Common/*.cpp) $(wildcard Net/*.cpp) $(wildcard Net/Poller/*.cpp)
+INC	= -I. -I./Base -I./Common  -I./Net -I./Net/Poller -I./Net/Interface
+SRCS = $(wildcard ./*.cpp) $(wildcard Base/*.cpp) $(wildcard Common/*.cpp) $(wildcard Net/*.cpp) $(wildcard Net/Poller/*.cpp) $(wildcard Net/Interface/*.cpp)
 
 COMPILE_LIB_HOME = ./
 DYNAMIC_NAME = libreactor.so

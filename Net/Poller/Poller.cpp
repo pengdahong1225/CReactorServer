@@ -5,8 +5,8 @@
 #include "Poller.h"
 #include "PollPoller.h"
 #include "EpollPoller.h"
-#include "../Channel.h"
-#include "../EventLoop.h"
+#include "Channel.h"
+#include "EventLoop.h"
 
 
 using namespace reactor;

@@ -5,7 +5,7 @@
 #ifndef CREACTORSERVER_BUFFER_H
 #define CREACTORSERVER_BUFFER_H
 
-#include "noncopyable.h"
+#include "Common/noncopyable.h"
 #include <vector>
 #include <sys/types.h>
 #include <string>

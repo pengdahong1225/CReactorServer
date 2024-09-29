@@ -5,8 +5,8 @@
 #ifndef CREACTORSERVER_TCPCONNECTION_H
 #define CREACTORSERVER_TCPCONNECTION_H
 
-#include "Common.h"
-#include "Interface/Code_c.h"
+#include "Common/Common.h"
+#include "Common/Code_c.h"
 #include "Buffer.h"
 #include "Interface/Handler.h"
 #include <string>

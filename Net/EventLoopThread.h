@@ -5,7 +5,7 @@
 #ifndef CREACTORSERVER_EVENTLOOPTHREAD_H
 #define CREACTORSERVER_EVENTLOOPTHREAD_H
 
-#include "noncopyable.h"
+#include "Common/noncopyable.h"
 #include <functional>
 #include <string>
 #include <thread>

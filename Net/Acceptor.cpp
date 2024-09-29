@@ -24,9 +24,14 @@ Acceptor::~Acceptor() {
     ::close(acceptChannel_.fd());
 }
 
+/**
+ * 监听端口
+ * 注册读事件
+ */
 void Acceptor::listen() {
     listening_ = true;
     acceptSocket_.listen();
+    acceptChannel_.enableReading();
 }
 
 bool Acceptor::listening() const {

@@ -46,6 +46,7 @@ void Socket::listen() {
         perror("listen");
         sockState_ = SockError;
     }
+    printf("listen success\n");
 }
 
 int Socket::accept(struct sockaddr_in *addr) {
