@@ -174,6 +174,8 @@ void TcpConnection::connectDestroyed() {
         }
     }
     channel_->remove(); // 关闭处理器
+
+    close(fd_); // 关闭socket
 }
 
 int TcpConnection::getSockfd() const {
