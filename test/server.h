@@ -1,7 +1,7 @@
 #include "Common.h"
 #include "TcpServer.h"
 #include "TcpConnection.h"
-#include "Common/Handler.h"
+#include "Common/HandlerProxyBasic.h"
 
 class Handler : public BaseHandler
 {
