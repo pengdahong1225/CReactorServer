@@ -44,10 +44,12 @@ ssize_t Buffer::readFd(int fd) {
     // when there is enough space in this buffer, don't read into extrabuf.
     const int iovcnt = (writeable < sizeof extrabuf) ? 2 : 1; // 按照顺序 -- 填充缓冲区
     const ssize_t n = ::readv(fd, vec, iovcnt);
-    if (n < 0)
+    if (n < 0){
         return -1;
-    else if (static_cast<size_t>(n) <= writeable)
+    }
+    else if (static_cast<size_t>(n) <= writeable){
         writerIndex_ += n;
+    }
     else {
         writerIndex_ += n;
         append(extrabuf, n - writeable); // 追加
@@ -94,10 +96,12 @@ const char *Buffer::peek() const {
 
 void Buffer::retrieve(size_t len) {
     assert(len <= readableBytes());
-    if (len < readableBytes())
+    if (len < readableBytes()){
         readerIndex_ += len;
-    else
+    }
+    else{
         retrieveAll();
+    }
 }
 
 void Buffer::retrieveAll() {

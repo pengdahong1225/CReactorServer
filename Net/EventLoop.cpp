@@ -67,13 +67,15 @@ void EventLoop::loop() {
         }
         currentActiveChannel_ = nullptr;
         eventHandling_ = false;
+        // 处理队列中的任务
+        doPendingFunctors();
     }
     isLoopping_ = false;
     printf("EventLoop::loop() stopped\n");
 }
 
 void EventLoop::assertInLoopThread() {
-    // 检查该loop是否是本线程的loop，防止抢占
+    assert(this->isInLoopThread() == true);
 }
 
 // 通过修改channel的关心事件，再调用EventLoop::updateChannel去映射修改poller中的关心事件
@@ -102,11 +104,11 @@ void EventLoop::quit() {
 }
 
 /**
- * 调用runInLoop去执行cd
- * 如果调用方是与this绑定的线程，可直接执行
- * 否则需要调用queueInLoop放入任务队列中并唤醒
- * 这样该函数可以在其他线程被安全调用，例如·TcpServer::newConnection·
  * @param cb
+ * 调用runInLoop去执行cd
+ * 准则：所有对IO和Buffer的操作都必须在loop的工作线中完成。
+ * 如果调用方是与loop绑定的线程，可直接执行任务
+ * 否则需要调用queueInLoop放入任务队列中并唤醒
  */
 void EventLoop::runInLoop(EventLoop::Functor cb) {
     if (isInLoopThread()) {
@@ -121,9 +123,13 @@ void EventLoop::queueInLoop(EventLoop::Functor cb) {
         std::unique_lock<std::mutex> lock(this->mtx_);
         pendingFunctors_.push_back(std::move(cb));
     }
-    // 不是当前IO线程肯定要唤醒
-    // 此外，如果正在调用Pending functor，也要唤醒；（因为如果正在执行PendingFunctor里面，
-    // 如果也执行了queueLoop，如果不唤醒的话，新加的cb就不会立即执行了。）
+
+    /**
+     * doPendingFunctors()是在每次loop的最后调用
+     * queueInLoop()的调用分两种情况：
+     * 1.调用方不是本loop的工作线程：需要唤醒它。
+     * 2.调用方是本loop的工作线程，但是已经在处理队列任务了，如果不唤醒的话，就需要等到下一轮loop才会处理本次任务，所以需要自我唤醒。
+     */
     if (!isInLoopThread() || callingPendingFunctors_) {
         wakeup();
     }
@@ -144,7 +150,6 @@ void EventLoop::doPendingFunctors() {
     callingPendingFunctors_ = false;
 }
 
-// 线程可能阻塞在poller调用，用wakeup将其唤醒
 void EventLoop::wakeup() {
     uint64_t one = 1;
     ::write(wakeupFd_, &one, sizeof one);

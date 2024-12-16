@@ -18,10 +18,9 @@ namespace reactor {
 
     class TcpServer : noncopyable {
     public:
-        TcpServer(EventLoop *loop, InetAddr &addr);
+        TcpServer(EventLoop *loop, InetAddr &addr, HandlerProxyBasic* proxy);
         ~TcpServer();
 
-        void setHandlerCallback(BaseHandler* h);
         void start();
         void setThreadNum(int numThreads);
         void newConnection(int sockfd, InetAddr &peerAddr);
@@ -34,7 +33,7 @@ namespace reactor {
         std::unique_ptr<Acceptor> acceptor_; //接收器
         std::map<int, TcpConnectionPtr> connectionMap_; //连接队列(fd,TcpConnection)
         std::shared_ptr<EventLoopThreadPool> threadPool_; // loop池
-        BaseHandler* handler = nullptr; // 应用层handler
+        HandlerProxyBasic* handler_proxy_ = nullptr; // 应用层handler
     };
 }
 

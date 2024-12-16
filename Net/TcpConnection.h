@@ -6,15 +6,11 @@
 #define CREACTORSERVER_TCPCONNECTION_H
 
 #include "Common/Common.h"
-#include "Common/Code_c.h"
 #include "Buffer.h"
-#include "Interface/Handler.h"
+#include "Common/Handler.h"
 #include <string>
 #include <memory>
 
-/*
- * 连接器 -- 抽象封装'链接'的详细属性
- */
 namespace reactor {
     class Channel;
     class EventLoop;
@@ -42,15 +38,15 @@ namespace reactor {
         void handleClose();
         void handleError();
 
-        void setHandlerCallback(BaseHandler* h);
-        void setCloseCallback(const std::function<void(const TcpConnectionPtr &)>& cb);
+        void bindHandlerProxy(HandlerProxyBasic* h);
         void connectEstablished();
         void connectDestroyed();
         void setState(ConnectionState s);
         void send(const std::string &msg);
-        void sendInLoop(std::string &msg);
-        void sendInLoop(const void *data, size_t len);
         void shutdownInLoop();
+
+    private:
+        void sendInLoop(const void *data, size_t len);
 
     private:
         EventLoop *loop_;// 该连接对应的loop 多线程情况下运行在其他线程中
@@ -60,9 +56,7 @@ namespace reactor {
         std::unique_ptr<Channel> channel_;// 专属处理器
         Buffer inputBuffer_;// 接收缓冲区
         Buffer outputBuffer_;// 发送缓冲区
-        Codec codec_;
-        BaseHandler* handler = nullptr; // 应用层handler
-        std::function<void(const TcpConnectionPtr &)> close_callback;
+        HandlerProxyBasic* handler = nullptr;
     };
 }
 

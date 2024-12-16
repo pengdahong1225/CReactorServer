@@ -10,8 +10,8 @@
 
 using namespace reactor;
 
-TcpServer::TcpServer(EventLoop *loop, InetAddr &addr)
-        : loop_(loop), addr_(addr),
+TcpServer::TcpServer(EventLoop *loop, InetAddr &addr, HandlerProxyBasic* proxy)
+        : loop_(loop), addr_(addr), handler_proxy_(proxy),
           acceptor_(new Acceptor(loop, addr)),
           threadPool_(new EventLoopThreadPool(loop)) {
     // 新连接回调
@@ -38,9 +38,8 @@ void TcpServer::newConnection(int sockfd, InetAddr &peerAddr) {
     EventLoop *ioloop = threadPool_->getNextLoop();
     TcpConnectionPtr conn(new TcpConnection(ioloop, sockfd, peerAddr));
     connectionMap_[sockfd] = conn;
-    conn->setHandlerCallback(handler);
-    conn->setCloseCallback(std::bind(&TcpServer::removeConnection, this, _1));
-    // 开始监听io事件
+    conn->bindHandlerProxy(handler_proxy_);
+    // enable read
     ioloop->runInLoop(std::bind(&TcpConnection::connectEstablished, conn));
 }
 
@@ -60,8 +59,4 @@ void TcpServer::removeConnectionInLoop(const TcpConnectionPtr &conn) {
     assert(n == 1);
     EventLoop *ioLoop = conn->getLoop();
     ioLoop->runInLoop(std::bind(&TcpConnection::connectDestroyed, conn));
-}
-
-void TcpServer::setHandlerCallback(BaseHandler *h) {
-    handler = h;
 }

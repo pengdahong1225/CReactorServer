@@ -26,28 +26,21 @@ TcpConnection::~TcpConnection() {
     assert(state_ == DisConnected);
 }
 
-void TcpConnection::send(const std::string &msg) {
-    // 发送
+void TcpConnection::send(const std::string &data) {
     if (state_ == Connected) {
-        // 编码
-        std::string data = codec_.EnCodeData(msg);
-        // 指定参数版本
-        void (TcpConnection::*funcPtr)(std::string &) = &TcpConnection::sendInLoop;
-        loop_->runInLoop(std::bind(funcPtr, this, data));
+        // 将发送任务交给loop线程
+        loop_->runInLoop(std::bind(&TcpConnection::sendInLoop, this, data.c_str(), data.size()));
     }
 }
 
 // 可读事件回调
 void TcpConnection::handleRead() {
     loop_->assertInLoopThread();
-    size_t n = inputBuffer_.readFd(fd_);
+    size_t n = inputBuffer_.readFd(fd_); // 内核缓冲区 -> 用户缓冲区
     if (n > 0) {
-        // 解析
-        std::string msg = codec_.DeCodeData(inputBuffer_);
-        if (msg.empty()) {
-            handleError();
-        }
-        handler->MessageHandler(shared_from_this(), msg); // 避免两次析构
+        // TODO 包接收方案，默认直接全部接收
+        std::string data = inputBuffer_.retrieveAllAsString();
+        handler->OnPacketComplete(shared_from_this(), data); // 避免两次析构
     }
     else if (n == 0) {
         handleClose();
@@ -64,9 +57,9 @@ void TcpConnection::handleWrite() {
         if (n > 0) {
             outputBuffer_.retrieve(n); // 写了多少，偏移多少
             if (outputBuffer_.readableBytes() == 0) {
-                channel_->disableWriting();
+                channel_->disableWriting(); // 写完之后需要取消关心写事件
                 if (handler != nullptr) {
-                    loop_->runInLoop(std::bind(&BaseHandler::WriteCompleteHandler, handler, shared_from_this()));
+                    loop_->runInLoop(std::bind(&HandlerProxyBasic::OnWriteComplete, handler, shared_from_this()));
                 }
                 if (state_ == DisConnecting) {
                     shutdownInLoop();
@@ -88,10 +81,8 @@ void TcpConnection::handleClose() {
     setState(DisConnected);
     channel_->disableAll();
 
-    if (handler != nullptr && close_callback) {
-        TcpConnectionPtr guardThis(shared_from_this());
-        handler->ConnectionHandler(guardThis);
-        close_callback(guardThis);
+    if (handler != nullptr) {
+        handler->OnClose(shared_from_this());
     }
 }
 
@@ -100,7 +91,7 @@ void TcpConnection::handleError() {
     printf("TcpConnection::handleError\n");
 }
 
-void TcpConnection::setHandlerCallback(BaseHandler *h) {
+void TcpConnection::bindHandlerProxy(HandlerProxyBasic *h) {
     handler = h;
 }
 
@@ -115,38 +106,33 @@ void TcpConnection::setState(ConnectionState s) {
     state_ = s;
 }
 
-void TcpConnection::sendInLoop(std::string &msg) {
-    sendInLoop(msg.data(), msg.size());
-}
-
 void TcpConnection::sendInLoop(const void *data, size_t len) {
     loop_->assertInLoopThread();
     if (state_ == DisConnected) {
         printf("disconnected, give up writing\n");
         return;
     }
-    ssize_t nwrote = 0;
-    size_t remaining = len;
-    bool faultError = false;
-    // 如果channel不可写，同时缓冲区没有等待发送的数据，试试不走eventloop，尝试看看能不能直接发送
+    ssize_t nwrite = 0; // 已经发送的字节数
+    size_t remaining = len; // 剩余的字节数
+    bool err = false;
+    // 尝试不等待可写事件响应，看能不能直接发送
     if (!channel_->isWriting() && outputBuffer_.readableBytes() == 0) {
-        nwrote = ::write(fd_, data, len);
-        if (nwrote >= 0) {
-            remaining = len - nwrote;
+        nwrite = ::write(fd_, data, len);
+        if (nwrite >= 0) {
+            remaining = len - nwrite;
             if (remaining == 0 && handler) {
-                loop_->runInLoop(std::bind(&BaseHandler::WriteCompleteHandler, handler, shared_from_this()));
+                loop_->runInLoop(std::bind(&HandlerProxyBasic::OnWriteComplete, handler, shared_from_this()));
             }
         }
         else {
-            nwrote = 0;
-            faultError = true;
+            nwrite = 0;
+            err = true;
         }
     }
-    assert(remaining <= len);
-    // data没有发完，且目前还没有error -> 去监听可写事件
-    if (!faultError && remaining > 0) {
-        outputBuffer_.append(static_cast<const char *>(data) + nwrote, remaining);
-        if (!channel_->isWriting()){
+    // data没有发完 -> 去监听可写事件
+    if (!err && remaining > 0) {
+        outputBuffer_.append(static_cast<const char *>(data) + nwrite, remaining);
+        if (!channel_->isWriting()) {
             channel_->enableWriting();
         }
     }
@@ -154,7 +140,7 @@ void TcpConnection::sendInLoop(const void *data, size_t len) {
 
 void TcpConnection::shutdownInLoop() {
     loop_->assertInLoopThread();
-    if (!channel_->isWriting()){
+    if (!channel_->isWriting()) {
         shutdown(fd_, SHUT_WR); // 关闭写通道
     }
 }
@@ -170,7 +156,7 @@ void TcpConnection::connectDestroyed() {
         setState(DisConnected);
         channel_->disableAll(); // 取消所有的事件关心
         if (handler != nullptr) {
-            handler->ConnectionHandler(shared_from_this());
+            handler->OnConnected(shared_from_this());
         }
     }
     channel_->remove(); // 关闭处理器
@@ -180,8 +166,4 @@ void TcpConnection::connectDestroyed() {
 
 int TcpConnection::getSockfd() const {
     return fd_;
-}
-
-void TcpConnection::setCloseCallback(const std::function<void(const TcpConnectionPtr &)> &cb) {
-    close_callback = cb;
 }

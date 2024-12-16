@@ -69,8 +69,8 @@ namespace reactor {
         eventCallback writeCallBack_;
 
         // 事件
-        int events_;    // 关心的事件 ->poller
         int revents_;   // 活动的事件 <-poller
+        int events_;    // 关心的事件 ->poller
 
         // 事件类型
         static const int kNoneEvent;
