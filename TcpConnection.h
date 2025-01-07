@@ -7,7 +7,7 @@
 
 #include "Common/Common.h"
 #include "Buffer.h"
-#include "Common/Handler.h"
+#include "Common/HandlerProxyBasic.h"
 #include <string>
 #include <memory>
 

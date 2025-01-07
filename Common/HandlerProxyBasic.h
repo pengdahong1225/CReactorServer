@@ -2,10 +2,10 @@
 // Created by Messi on 24-8-15.
 //
 
-#ifndef NET_HANDLER_H
-#define NET_HANDLER_H
+#ifndef NET_HANDLERPROXYBASIC_H
+#define NET_HANDLERPROXYBASIC_H
 
-#include "Common/Common.h"
+#include "Common.h"
 
 /**
  * 句柄代理基类
@@ -19,4 +19,4 @@ public:
 };
 
 
-#endif //NET_HANDLER_H
+#endif //NET_HANDLERPROXYBASIC_H
