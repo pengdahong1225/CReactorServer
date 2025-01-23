@@ -1,7 +1,1 @@
-.idea/
-.vscode
-cmake-build-debug
-*.o
-*.d
-*.a
-*.so
+/.idea

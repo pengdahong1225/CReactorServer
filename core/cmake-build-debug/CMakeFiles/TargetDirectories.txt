@@ -1,0 +1,3 @@
+/cygdrive/d/Project/peter/CReactorServer/core/cmake-build-debug/CMakeFiles/..dir
+/cygdrive/d/Project/peter/CReactorServer/core/cmake-build-debug/CMakeFiles/edit_cache.dir
+/cygdrive/d/Project/peter/CReactorServer/core/cmake-build-debug/CMakeFiles/rebuild_cache.dir
