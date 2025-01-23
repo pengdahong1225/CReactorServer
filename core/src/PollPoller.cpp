@@ -11,6 +11,7 @@ int PollPoller::poll(int timeout, PollerObjectList *activeObjs) {
     if (activeNum > 0) {
         fillActiveObjs(activeNum, activeObjs);
     }
+    return activeNum;
 }
 
 void PollPoller::updatePollerObject(PollerObject *obj, bool is_add /*= false*/) {

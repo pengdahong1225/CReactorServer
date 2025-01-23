@@ -83,8 +83,8 @@ const char *EpollPoller::operationToString(int op) {
 
 void EpollPoller::fillActiveObjs(int activeNum, PollerObjectList *activeObjs) {
     for (int i = 0; i < activeNum; i++) {
-        auto *object = static_cast<PollerObject *>(eventList_[i].data.ptr);
-        object->set_revent(eventList_[i].events);
+        auto *object = static_cast<PollerObject *>(event_list_[i].data.ptr);
+        object->setrevent(event_list_[i].events);
         activeObjs->push_back(object);
     }
 }

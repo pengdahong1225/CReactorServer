@@ -18,10 +18,11 @@ STATIC_NAME = libcore.a
 DYNAMIC_LIB	= $(LIB_DIR)/$(DYNAMIC_NAME)
 STATIC_LIB = $(LIB_DIR)/$(STATIC_NAME)
 
-INC	= -I./include -I../3rdparty/google
+INC	= -I./include -I../3rdparty
 SRCS = $(wildcard ./src/*.cpp)
 OBJS = $(patsubst %.cpp, %.o,  $(SRCS))
 LINK = -lpthread
+LINK += -L$(LIB_DIR) -lglog
 
 # objdep
 DEP_DIR := ./objdep

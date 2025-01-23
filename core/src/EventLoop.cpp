@@ -27,12 +27,12 @@ EventLoop::EventLoop() :
         looping_(false),
         state_(kIdle),
         thread_id_(0),
-        poller_(Poller::newDefaultPoller(this)),
+        poller_(Poller::newDefaultPoller()),
         current_object_(nullptr),
         timer_list_(nullptr),
         wakeup_fd_(CreateEventFd()),
         wakeup_object_(new WakeUpObject(this, wakeup_fd_)) {
-    wakeup_object_->EnableReading();
+    wakeup_object_->EnableReading(true);
 }
 
 EventLoop::~EventLoop() {
