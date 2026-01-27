@@ -47,21 +47,29 @@ void TcpSocketHandler::send(const std::string &data) {
     });
 }
 
-// 可读事件回调
-// 一次响应只处理一个完整的数据包，避免了事件循环里“循环处理多个包可能导致的阻塞或长时间占用CPU”的问题
-// 但是存在：后续无事件触发导致的剩余数据包搁置的问题
+/**
+ * 可读事件回调
+ * 1：一次响应只处理一个完整的数据包，避免了事件循环里“循环处理多个包可能导致的阻塞或长时间占用CPU”的问题
+ * 但是存在：后续无事件触发导致的剩余数据包搁置的问题
+ * 2：使用循环在当前事件中处理尽可能多的完整包，一次事件尽量榨干所有完整包，而不用等下一次事件循环
+ * 同时也避免了“后续无事件触发导致的剩余数据包搁置的问题”
+ */
 void TcpSocketHandler::OnInputNotify() {
     size_t n = inputBuffer_.readFd(fd_); // 内核缓冲区 -> 用户缓冲区
     if (n > 0) {
-        // Buffer非线程安全，所以需要先把包读出来，再传递给应用层
-        int packet_len = packet_parser_.parse_packet_length(inputBuffer_);
-        // 数据错误
-        if (packet_len == -1) {
-            OnCloseNotify();
-        }
-        else if (packet_len > 0) {
-            std::string data = packet_parser_.get_packet(inputBuffer_, packet_len);
-            handler_proxy_->OnPacketComplete(this, data);
+        while (1) {
+            // Buffer非线程安全，所以需要先把包读出来，再传递给应用层
+            int packet_len = packet_parser_.parse_packet_length(inputBuffer_);
+            if (packet_len == -1) {
+                OnCloseNotify(); // 数据错误
+            }
+            else if (packet_len == 0) {
+                break;  // 退出，继续接收数据
+            }
+            else if (packet_len > 0) {
+                std::string data = packet_parser_.get_packet(inputBuffer_, packet_len);
+                handler_proxy_->OnPacketComplete(this, data);
+            }
         }
     }
     else if (n == 0) {
