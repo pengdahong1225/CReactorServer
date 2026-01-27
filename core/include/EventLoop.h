@@ -21,6 +21,8 @@ class WakeUpObject;
  * 事件循环
  * EventLoop要保证线程安全，某个文件描述符的事件监听增删查改都必须由其绑定的线程执行。
  * 非本线程调用，要调用queueInLoop并唤醒目标线程，参考：EventLoop::runInLoop。
+ * 
+ * 对于Reactor(同步事件驱动)模型，应该高度保证：“对于 fd 的 IO 操作要在 EventLoop 的线程中执行”。
  */
 class EventLoop : noncopyable {
     typedef std::function<void()> Functor;

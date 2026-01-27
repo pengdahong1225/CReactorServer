@@ -48,6 +48,8 @@ void TcpSocketHandler::send(const std::string &data) {
 }
 
 // 可读事件回调
+// 一次响应只处理一个完整的数据包，避免了事件循环里“循环处理多个包可能导致的阻塞或长时间占用CPU”的问题
+// 但是存在：后续无事件触发导致的剩余数据包搁置的问题
 void TcpSocketHandler::OnInputNotify() {
     size_t n = inputBuffer_.readFd(fd_); // 内核缓冲区 -> 用户缓冲区
     if (n > 0) {

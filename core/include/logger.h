@@ -5,7 +5,7 @@
 #ifndef SERVER_LOGGER_H
 #define SERVER_LOGGER_H
 
-#include "google/glog/logging.h"
+#include <google/glog/logging.h>
 #include <string>
 
 #define LOG_INFO(a) COMPACT_GOOGLE_LOG_INFO.stream()<<a;
