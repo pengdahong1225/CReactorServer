@@ -144,7 +144,7 @@ void EventLoop::doPendingFunctors() {
     }
 }
 
-void EventLoop::wakeup() {
+void EventLoop::wakeup() const {
     uint64_t one = 1;
     ::write(wakeup_fd_, &one, sizeof one);
 }
@@ -168,7 +168,7 @@ void EventLoop::doTimerCheck() {
     }
 }
 
-void EventLoop::clear() {
+void EventLoop::clear() const {
     // 关闭所有定时器
     if (timer_list_ != nullptr) {
         timer_list_->StopAllTimer();

@@ -22,7 +22,7 @@ void TcpSocketHandler::send(const std::string &data) {
     if (state_ != CONN_CONNECTED) {
         return;
     }
-    std::string packet = packet_parser_.serialize_packet(data);
+    std::string packet = PacketStreamParser::serialize_packet(data);
     owner_loop_->runInLoop([&]() {
         if (state_ != CONN_CONNECTED) {
             return;
@@ -57,9 +57,9 @@ void TcpSocketHandler::send(const std::string &data) {
 void TcpSocketHandler::OnInputNotify() {
     size_t n = inputBuffer_.readFd(fd_); // 内核缓冲区 -> 用户缓冲区
     if (n > 0) {
-        while (1) {
+        while (true) {
             // Buffer非线程安全，所以需要先把包读出来，再传递给应用层
-            int packet_len = packet_parser_.parse_packet_length(inputBuffer_);
+            int packet_len = PacketStreamParser::parse_packet_length(inputBuffer_);
             if (packet_len == -1) {
                 OnCloseNotify(); // 数据错误
             }
@@ -67,7 +67,7 @@ void TcpSocketHandler::OnInputNotify() {
                 break;  // 退出，继续接收数据
             }
             else if (packet_len > 0) {
-                std::string data = packet_parser_.get_packet(inputBuffer_, packet_len);
+                std::string data = PacketStreamParser::get_packet(inputBuffer_, packet_len);
                 handler_proxy_->OnPacketComplete(this, data);
             }
         }

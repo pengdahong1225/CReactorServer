@@ -23,7 +23,7 @@ public:
 
     void setThreadNum(int numThreads);
     void start();
-    bool started();
+    bool started() const;
     EventLoop *getNextLoop();
     std::vector<EventLoop *> getAllLoops();
 

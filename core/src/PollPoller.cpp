@@ -29,7 +29,7 @@ void PollPoller::updatePollerObject(PollerObject *obj, bool is_add /*= false*/) 
         object_map_[temp.fd] = obj;
     }
     else {
-        if (poll_fd_map_.find(obj->fd()) == poll_fd_map_.end()) {
+        if (!poll_fd_map_.contains(obj->fd())) {
             LOG_ERROR("PollerObject not exits, fd =" << obj->fd())
             return;
         }
@@ -58,14 +58,13 @@ void PollPoller::fillActiveObjs(int activeNum, PollerObjectList *activeObjs) {
 }
 
 void PollPoller::removePollerObject(PollerObject *obj) {
-    if (object_map_.find(obj->fd()) == object_map_.end()) {
+    if (!object_map_.contains(obj->fd())) {
         LOG_ERROR("PollerObject not exits, fd =" << obj->fd())
         return;
     }
     object_map_.erase(obj->fd());
     poll_fd_map_.erase(obj->fd());
-    auto iter = poll_fds_.cbegin();
-    for (; iter != poll_fds_.cend(); iter++) {
+    for (auto iter = poll_fds_.cbegin(); iter != poll_fds_.cend(); ++iter) {
         if (iter->fd == obj->fd()) {
             poll_fds_.erase(iter);
             break;

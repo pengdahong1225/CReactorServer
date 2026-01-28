@@ -29,7 +29,7 @@ void EventLoopThreadPool::start() {
     }
 }
 
-bool EventLoopThreadPool::started() {
+bool EventLoopThreadPool::started() const {
     return started_;
 }
 

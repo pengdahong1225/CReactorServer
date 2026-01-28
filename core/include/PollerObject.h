@@ -7,6 +7,9 @@
 
 #include "EventLoop.h"
 
+/**
+ * 事件驱动对象基础类
+ */
 class PollerObject {
 public:
     PollerObject(EventLoop *loop, int fd);
@@ -58,6 +61,9 @@ protected:
     static const int kWriteEvent;
 };
 
+/**
+ * 自唤醒机制
+ */
 class WakeUpObject : public PollerObject {
 public:
     WakeUpObject(EventLoop *loop, int fd) : PollerObject(loop, fd) {}

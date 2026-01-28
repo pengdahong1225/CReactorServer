@@ -6,6 +6,7 @@
 #define CORE_SOCKET_H
 
 #include <string>
+#include <utility>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
@@ -14,7 +15,7 @@ typedef struct InetAddr {
     int port;
 
     InetAddr() : ip(""), port(0) {}
-    InetAddr(std::string ip, int port) : ip(ip), port(port) {}
+    InetAddr(std::string ip, int port) : ip(std::move(ip)), port(port) {}
 
     void Clear() {
         ip.clear();

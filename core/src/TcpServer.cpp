@@ -97,8 +97,7 @@ void TcpServer::ProcessOnTimerOut(int64_t timer_id) {
         return;
     }
     LOG_ERROR("TcpServer::ProcessOnTimerOut")
-    auto iter = tcp_socket_handlers_.begin();
-    for (; iter != tcp_socket_handlers_.end(); iter++) {
+    for (auto iter = tcp_socket_handlers_.begin(); iter != tcp_socket_handlers_.end(); ++iter) {
         auto handler = *iter;
         if (handler->state() != ConnectionState::CONN_CONNECTED) {
             handler->destroyed();

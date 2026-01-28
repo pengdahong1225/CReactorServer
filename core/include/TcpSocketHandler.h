@@ -47,7 +47,6 @@ protected:
     ConnectionState state_;
     Buffer inputBuffer_;// 接收缓冲区
     Buffer outputBuffer_;// 发送缓冲区
-    PacketStreamParser packet_parser_;
     HandlerProxyBasic *handler_proxy_ = nullptr;
 };
 

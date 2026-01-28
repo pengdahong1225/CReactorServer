@@ -22,7 +22,7 @@
 // * +-----------------------------------+.
 // * packet len = magic code + body bytes
 
-#define TCP_DEFAULT_BUFFER 1024*400
+#define TCP_DEFAULT_BUFFER (1024*400)
 #pragma pack(1)
 struct PacketHeader {
     unsigned int pack_len;
@@ -36,7 +36,7 @@ struct PacketHeader {
  */
 class PacketStreamParser {
 public:
-    int parse_packet_length(Buffer &buffer) {
+    static int parse_packet_length(Buffer &buffer) {
         size_t buf_len = buffer.readableBytes();
         // 不足一个包头，继续接收
         if (buf_len < sizeof(PacketHeader)) {
@@ -63,15 +63,15 @@ public:
         return pkg_len;
     }
 
-    std::string get_packet(Buffer &buffer, size_t len) {
+    static std::string get_packet(Buffer &buffer, size_t len) {
         std::string packet = buffer.retrieveAsString(len);
         std::string body = packet.substr(sizeof(PacketHeader));
         printf("packet len=%ld, body len=%ld\n", packet.size(), body.size());
         return body;
     }
 
-    std::string serialize_packet(const std::string &body) {
-        struct PacketHeader header;
+    static std::string serialize_packet(const std::string &body) {
+        struct PacketHeader header{};
         header.pack_len = htonl(body.size());
         header.magic_code[0] = 'X';
         header.magic_code[1] = 'X';

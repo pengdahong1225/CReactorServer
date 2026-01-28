@@ -54,8 +54,8 @@ private:
     void queueInLoop(Functor cb);
     void doTimerCheck();
     void doPendingFunctors();
-    void wakeup();
-    void clear();
+    void wakeup() const;
+    void clear() const;
 
 private:
     std::atomic<bool> looping_;  // loop是否在运行
