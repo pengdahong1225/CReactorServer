@@ -26,10 +26,6 @@ TcpServer::TcpServer(EventLoop *loop, InetAddr &addr)
 }
 
 TcpServer::~TcpServer() {
-    if (handler_proxy_ != nullptr) {
-        delete handler_proxy_;
-        handler_proxy_ = nullptr;
-    }
 }
 
 void TcpServer::listenInLoop() {
@@ -87,8 +83,8 @@ void TcpServer::OnCloseNotify() {}
 
 void TcpServer::OnErrorNotify() {}
 
-void TcpServer::bindHandlerProxy(HandlerProxyBasic *h) {
-    handler_proxy_ = h;
+void TcpServer::bindHandlerProxy(std::shared_ptr<HandlerProxyBasic> h) {
+    handler_proxy_ = std::move(h);
 }
 
 // 定时器响应
@@ -96,14 +92,17 @@ void TcpServer::ProcessOnTimerOut(int64_t timer_id) {
     if (timer_id != TCPSERVER_TIMER) {
         return;
     }
-    LOG_ERROR("TcpServer::ProcessOnTimerOut")
-    for (auto iter = tcp_socket_handlers_.begin(); iter != tcp_socket_handlers_.end(); ++iter) {
+    if (tcp_socket_handlers_.empty()) {
+        return;
+    }
+    for (auto iter = tcp_socket_handlers_.begin(); iter != tcp_socket_handlers_.end(); ) {
         auto handler = *iter;
         if (handler->state() != ConnectionState::CONN_CONNECTED) {
             handler->destroyed();
-            tcp_socket_handlers_.erase(iter);
+            iter = tcp_socket_handlers_.erase(iter);
             delete handler;
-            handler = nullptr;
+        } else {
+            ++iter;
         }
     }
 }

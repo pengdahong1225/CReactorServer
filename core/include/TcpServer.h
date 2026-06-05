@@ -27,7 +27,7 @@ public:
 
     void start();
     void setThreadNum(int numThreads);
-    void bindHandlerProxy(HandlerProxyBasic *h);
+    void bindHandlerProxy(std::shared_ptr<HandlerProxyBasic> h);
 
 public:
     void ProcessOnTimerOut(int64_t timer_id) override;
@@ -44,7 +44,7 @@ private:
 private:
     struct sockaddr_in listen_addr_{};
     std::shared_ptr<EventLoopThreadPool> thread_pool_; // loop池
-    HandlerProxyBasic *handler_proxy_ = nullptr;
+    std::shared_ptr<HandlerProxyBasic> handler_proxy_;
     std::vector<TcpSocketHandler*> tcp_socket_handlers_;
     Timer timer_;
 };

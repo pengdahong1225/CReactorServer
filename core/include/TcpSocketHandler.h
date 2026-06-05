@@ -36,7 +36,7 @@ public:
     void OnErrorNotify() override;
 
     void reset();
-    void bindHandlerProxy(HandlerProxyBasic *h);
+    void bindHandlerProxy(std::shared_ptr<HandlerProxyBasic> h);
     void established();
     void destroyed();
     void send(const std::string &msg);
@@ -47,7 +47,7 @@ protected:
     ConnectionState state_;
     Buffer inputBuffer_;// 接收缓冲区
     Buffer outputBuffer_;// 发送缓冲区
-    HandlerProxyBasic *handler_proxy_ = nullptr;
+    std::shared_ptr<HandlerProxyBasic> handler_proxy_;
 };
 
 class HandlerProxyBasic {

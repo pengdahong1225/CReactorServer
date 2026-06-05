@@ -12,10 +12,6 @@ TcpSocketHandler::TcpSocketHandler(EventLoop *loop, int socket_fd, InetAddr &&ad
 
 TcpSocketHandler::~TcpSocketHandler() {
     LOG_ERROR("TcpConnection::~TcpConnection at fd" << fd_);
-    if(handler_proxy_ != nullptr){
-        delete handler_proxy_;
-        handler_proxy_ = nullptr;
-    }
 }
 
 void TcpSocketHandler::send(const std::string &data) {
@@ -23,12 +19,13 @@ void TcpSocketHandler::send(const std::string &data) {
         return;
     }
     std::string packet = PacketStreamParser::serialize_packet(data);
-    owner_loop_->runInLoop([&]() {
+    // 值捕获 packet，避免 lambda 异步执行时局部变量已析构
+    owner_loop_->runInLoop([this, packet = std::move(packet)]() {
         if (state_ != CONN_CONNECTED) {
             return;
         }
-        ssize_t nwrite = 0; // 已经发送的字节数
-        size_t remaining = packet.size(); // 剩余的字节数
+        ssize_t nwrite = 0;
+        size_t remaining = packet.size();
         // 尝试不等待可写事件响应，看能不能直接发送
         if (!PollerObject::isWriting() && outputBuffer_.readableBytes() == 0) {
             nwrite = ::write(fd_, packet.data(), packet.size());
@@ -37,6 +34,7 @@ void TcpSocketHandler::send(const std::string &data) {
                 OnErrorNotify();
                 return;
             }
+            remaining = packet.size() - nwrite;
         }
         if (remaining > 0) {
             outputBuffer_.append(static_cast<const char *>(packet.data()) + nwrite, remaining);
@@ -62,6 +60,7 @@ void TcpSocketHandler::OnInputNotify() {
             int packet_len = PacketStreamParser::parse_packet_length(inputBuffer_);
             if (packet_len == -1) {
                 OnCloseNotify(); // 数据错误
+                break;
             }
             else if (packet_len == 0) {
                 break;  // 退出，继续接收数据
@@ -118,8 +117,8 @@ void TcpSocketHandler::reset(){
     outputBuffer_.retrieveAll();
 }
 
-void TcpSocketHandler::bindHandlerProxy(HandlerProxyBasic *h) {
-    handler_proxy_ = h;
+void TcpSocketHandler::bindHandlerProxy(std::shared_ptr<HandlerProxyBasic> h) {
+    handler_proxy_ = std::move(h);
 }
 
 void TcpSocketHandler::established() {
