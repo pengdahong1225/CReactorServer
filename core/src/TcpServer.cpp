@@ -59,6 +59,7 @@ void TcpServer::setThreadNum(int numThreads) {
 
 void TcpServer::OnInputNotify() {
     // 新连接入口
+    // 非阻塞fd，保证fd的读写操作都是非阻塞的
     struct sockaddr_in sin{};
     int nAddr = sizeof(sin);
     int new_fd = ::accept4(fd_, (struct sockaddr *) &sin, (socklen_t *) &nAddr, SOCK_NONBLOCK | SOCK_CLOEXEC);

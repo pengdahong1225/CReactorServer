@@ -27,6 +27,8 @@ void TcpSocketHandler::send(const std::string &data) {
         ssize_t nwrite = 0;
         size_t remaining = packet.size();
         // 尝试不等待可写事件响应，看能不能直接发送
+        // 1.如果已经注册了可写监听，说明输出缓冲区里还有没发完的数据，或者有数据正在排队等 socket 可写，必须等待。
+        // 2.没有积压数据，才可以直接发送。
         if (!PollerObject::isWriting() && outputBuffer_.readableBytes() == 0) {
             nwrite = ::write(fd_, packet.data(), packet.size());
             if (nwrite < 0) {
@@ -67,6 +69,7 @@ void TcpSocketHandler::OnInputNotify() {
             }
             else if (packet_len > 0) {
                 std::string data = PacketStreamParser::get_packet(inputBuffer_, packet_len);
+                // 同步调用
                 handler_proxy_->OnPacketComplete(this, data);
             }
         }
